@@ -51,7 +51,8 @@ export async function findByUsername(username) {
   
     return null;
   }
-/* Notum þegar við erum komnar með db 
+/* *******+  Notum þegar við erum komnar með db  ***********
+
 export async function findByUsername(username) {
   const q = 'SELECT * FROM users WHERE username = $1';
 
