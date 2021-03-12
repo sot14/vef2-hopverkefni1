@@ -1,0 +1,28 @@
+{
+  "name": "vef2-hopverkefni1",
+  "version": "1.0.0",
+  "description": "Útfæra skal vefþjónustur fyrir sjónvarpsþáttavef:",
+  "main": "index.js",
+  "dependencies": {
+    "date-fns": "^2.19.0",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "express-session": "^1.17.1",
+    "passport": "^0.4.1",
+    "passport-local": "^1.0.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sot14/vef2-hopverkefni1.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sot14/vef2-hopverkefni1/issues"
+  },
+  "homepage": "https://github.com/sot14/vef2-hopverkefni1#readme"
+}
