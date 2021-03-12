@@ -10,36 +10,18 @@ export const router = express.Router();
  * @returns {function} Middleware með villumeðhöndlun
  */
 
-
-/**** Gætum kannski gert eitthvað til að blanda login f. user og admin saman ****/
-
 const index = async (req, res) => {
   if (!req.isAuthenticated()) {
-    return res.redirect('/admin/login')
+    return res.redirect('/user/login')
   }
-  res.render('admin');
+  res.render('user');
 }
-
-const index = async (req, res) => {
-    if (!req.isAuthenticated()) {
-      return res.redirect('/user/login')
-    }
-    res.render('user');
-  }
 
 const login = async (req, res) => {
   if (req.isAuthenticated()) {
-    return res.redirect('/admin')
+    return res.redirect('/user')
   }
   let message = '';
-
-const login = async (req, res) => {
-    if (req.isAuthenticated()) {
-      return res.redirect('/user')
-    }
-    let message = '';
-
- /******************************************************************************/   
 
   // Athugum hvort einhver skilaboð séu til í session, ef svo er birtum þau
   // og hreinsum skilaboð
