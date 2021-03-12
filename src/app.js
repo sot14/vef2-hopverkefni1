@@ -87,11 +87,18 @@ app.use((req, res, next) => {
 });
 
 app.post(
-  '/login', passport.authenticate('local', {
+  '/login-admin', passport.authenticate('local', {
     failureMessage: 'Notandi eða lykilorð vitlaust.',
-    failureRedirect: '/admin/login',
+    failureRedirect: '/admin/admin-login',
   }),
   (req, res) => res.redirect('/admin')
+);
+app.post(
+  '/login-user', passport.authenticate('local', {
+    failureMessage: 'Notandi eða lykilorð vitlaust.',
+    failureRedirect: '/user/user-login',
+  }),
+  (req, res) => res.redirect('/user')
 );
 
 app.get('/logout', (req, res) => {

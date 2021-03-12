@@ -12,7 +12,7 @@ export const router = express.Router();
 
 const index = async (req, res) => {
   if (!req.isAuthenticated()) {
-    return res.redirect('/user/login')
+    return res.redirect('/user/login-user')
   }
   res.render('user');
 }
@@ -29,8 +29,8 @@ const login = async (req, res) => {
     message = req.session.messages.join(', ');
     req.session.messages = [];
   }
-  res.render('login', { message})
+  res.render('login-user', { message})
 }
 
-router.get('/login', catchErrors(login));
+router.get('/login-user', catchErrors(login));
 router.get('/', catchErrors(index));
