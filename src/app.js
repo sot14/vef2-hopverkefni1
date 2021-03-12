@@ -4,9 +4,9 @@ import express from 'express';
 import dotenv from 'dotenv';
 import fns from 'date-fns'
 
-import { router as registrationRouter } from './registration.js';
 import { router as adminRouter } from './admin.js';
 import { strat, serializeUser, deserializeUser } from './users.js';
+import {router as regRouter } from './registered.js'
 
 // Library middleware fyrir express
 import passport from 'passport';
@@ -110,9 +110,12 @@ app.locals.formatDate = (str) => {
 
   return date;
 };
-
-app.use('/', registrationRouter);
+app.get('/', (req, res) => {
+  res.render('index');
+});
+//app.use('/', registrationRouter);
 app.use('/admin', adminRouter);
+app.use('/user', regRouter);
 
 /**
  * Middleware sem sér um 404 villur.
