@@ -29,7 +29,7 @@ const login = async (req, res) => {
     message = req.session.messages.join(', ');
     req.session.messages = [];
   }
-  res.render('login', { message})
+  res.render('login-admin', { message})
 }
 
 router.get('/login-admin', catchErrors(login));

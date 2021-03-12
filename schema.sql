@@ -45,3 +45,9 @@ CREATE TABLE IF NOT EXISTS users(
 
 -- Tengitafla fyrir notendur og sjónvarpsþætti
 
+CREATE TABLE IF NOT EXISTS me(
+  id serial primary key,
+  password character varying(255) NOT NULL unique, password > 9,
+  username character varying(255) NOT NULL,
+  passwsord character varying(255) NOT NULL
+);

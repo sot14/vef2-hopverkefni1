@@ -94,11 +94,11 @@ app.post(
   (req, res) => res.redirect('/admin')
 );
 app.post(
-  '/login-user', passport.authenticate('local', {
+  '/login', passport.authenticate('local', {
     failureMessage: 'Notandi eða lykilorð vitlaust.',
-    failureRedirect: '/user/user-login',
+    failureRedirect: '/users/user-login',
   }),
-  (req, res) => res.redirect('/user')
+  (req, res) => res.redirect('/users')
 );
 
 app.get('/logout', (req, res) => {
@@ -122,7 +122,7 @@ app.get('/', (req, res) => {
 });
 //app.use('/', registrationRouter);
 app.use('/admin', adminRouter);
-app.use('/user', regRouter);
+app.use('/users', regRouter);
 
 /**
  * Middleware sem sér um 404 villur.
