@@ -2,16 +2,17 @@ import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import express from 'express';
 import dotenv from 'dotenv';
-import fns from 'date-fns'
+import fns from 'date-fns';
 
 import { router as adminRouter } from './admin.js';
 import { strat, serializeUser, deserializeUser } from './users.js';
-import {router as regRouter } from './registered.js'
-import {router as TVrouter} from './tv.js'
+import {router as regRouter } from './registered.js';
+import {router as TVrouter} from './tv.js';
+import {series} from './tv.js';
 // Library middleware fyrir express
 import passport from 'passport';
 import passportLocal from 'passport-local';
-import session from 'express-session'
+import session from 'express-session';
 
 const { format } = fns;
 const { Strategy } = passportLocal;
@@ -123,7 +124,7 @@ app.locals.formatDate = (str) => {
 };
 
 app.get('/', (req, res) => {
-  res.render('index');
+  res.render('index',{series});
 });
 
 app.get('/genres', (req, res) => {

@@ -28,8 +28,8 @@ function readDataFromCSV(file) {
 router.get('/', (req, res) => {
     res.render('tv');
   });
-  
-readDataFromCSV('./data/series.csv');
+
+export const series =readDataFromCSV('./data/series.csv');
 readDataFromCSV('./data/seasons.csv');
 readDataFromCSV('./data/episodes.csv');
 
