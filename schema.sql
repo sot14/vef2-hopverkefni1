@@ -8,12 +8,12 @@ CREATE TABLE IF NOT EXISTS series(
   description varchar (1024),
   language varchar (64),
   network varchar (64),
-  url varchar (255),
+  url varchar (255)
 );
 
 CREATE TABLE IF NOT EXISTS genre(  
     id serial primary key, 
-    name varchar(128) not null,
+    name varchar(128) not null
 );
 
 -- tengitafla - series-genre
@@ -24,23 +24,23 @@ CREATE TABLE IF NOT EXISTS season(
     seasonNo integer not null check (seasonNo > 0),
     aired date,
     seasonPoster varchar (255),
-    serie serial FOREIGN KEY REFERENCES series (id),
+    serie serial REFERENCES series (id)
 );
 
 CREATE TABLE IF NOT EXISTS episodes(
     id serial primary key,
      name varchar(128) not null,
-     episodeNo integer not null check (seasonNo > 0),
+     episodeNo integer not null check (episodeNo > 0),
      aired date,
      description varchar (1024),
-     season serial FOREIGN KEY REFERENCES season(id), 
+     season serial REFERENCES season(id)
 );
 
 CREATE TABLE IF NOT EXISTS users(
   id serial primary key,
   username character varying(255) NOT NULL unique,
-  password character varying(255) NOT NULL unique (password > 9),
-  admin boolean default false,
+  password character varying(255) NOT NULL unique, --ath check (len(password) > 8)
+  admin boolean default false
 );
 
 -- Tengitafla fyrir notendur og sjónvarpsþætti
