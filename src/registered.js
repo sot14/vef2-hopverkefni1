@@ -12,14 +12,14 @@ export const router = express.Router();
 
 const index = async (req, res) => {
   if (!req.isAuthenticated()) {
-    return res.redirect('/user/login')
+    return res.redirect('/users/login')
   }
   res.render('user');
 }
 
 const login = async (req, res) => {
   if (req.isAuthenticated()) {
-    return res.redirect('/user')
+    return res.redirect('/users')
   }
   let message = '';
 
