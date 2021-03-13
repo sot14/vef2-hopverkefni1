@@ -1,7 +1,7 @@
 import fs from 'fs';
 import csvParser from 'csv-parser';
 
-function readDataFromCSV(file) {
+export function readDataFromCSV(file) {
     const read = fs.createReadStream(file, {encoding: 'utf8'}).pipe(csvParser());
     let data = [];
     read.on('error', () => {
@@ -24,6 +24,6 @@ function readDataFromCSV(file) {
 }
 
 readDataFromCSV('./data/series.csv');
-readDataFromCSV('./data/seasons.csv');
-readDataFromCSV('./data/episodes.csv');
+// readDataFromCSV('./data/seasons.csv');
+// readDataFromCSV('./data/episodes.csv');
 
