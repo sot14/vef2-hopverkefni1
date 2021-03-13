@@ -7,7 +7,7 @@ import fns from 'date-fns'
 import { router as adminRouter } from './admin.js';
 import { strat, serializeUser, deserializeUser } from './users.js';
 import {router as regRouter } from './registered.js'
-
+import {router as TVrouter} from './tv.js'
 // Library middleware fyrir express
 import passport from 'passport';
 import passportLocal from 'passport-local';
@@ -87,13 +87,7 @@ app.use((req, res, next) => {
 });
 
 // login virkini fyrir admin 
-app.post(
-  '/login-admin', passport.authenticate('local', {
-    failureMessage: 'Notandi eða lykilorð vitlaust.',
-    failureRedirect: '/admin/admin-login',
-  }),
-  (req, res) => res.redirect('/admin')
-);
+
 // login virkni fyrir users
 app.post(
   '/login', passport.authenticate('local', {
@@ -104,7 +98,7 @@ app.post(
 );
 // login virkni fyrir nýskráningar
 app.post(
-  '/register', passport.authenticate('local', {
+  '/users/register', passport.authenticate('local', {
     failureMessage: 'Notandi eða lykilorð vitlaust.',
     failureRedirect: '/register',
   }),
@@ -130,9 +124,16 @@ app.locals.formatDate = (str) => {
 app.get('/', (req, res) => {
   res.render('index');
 });
+app.get('/genres', (req, res) => {
+  res.render('genres');
+});
+
+
 //app.use('/', registrationRouter);
 app.use('/admin', adminRouter);
 app.use('/users', regRouter);
+app.use('/tv', TVrouter);
+
 
 /**
  * Middleware sem sér um 404 villur.
@@ -163,7 +164,7 @@ function errorHandler(err, req, res, next) {
   const text = '';
   res.status(500).render('error', { title, text });
 }
-app.get('/register', (req, res) => {
+app.get('/users/register', (req, res) => {
   res.render('register');
 });
 app.use((req, res, next) => {

@@ -1,11 +1,19 @@
-import fs from 'fs';
+import express from 'express';
+import { catchErrors } from './utils.js';
 
-const read = fs.createReadStream('./data/series.csv');
+export const router = express.Router();
 
-read.on('data', (chunk) => {
-  console.log('chunk', chunk);
-});
+/**
+ * Higher-order fall sem umlykur async middleware með villumeðhöndlun.
+ *
+ * @param {function} fn Middleware sem grípa á villur fyrir
+ * @returns {function} Middleware með villumeðhöndlun
+ */
 
-read.on('close', () => {
-  console.log('file read');
-});
+
+const index = async (req, res) => {
+ 
+  res.render('tv');
+}
+
+router.get('/', catchErrors(index));
