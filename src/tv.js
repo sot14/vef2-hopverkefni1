@@ -3,7 +3,7 @@ import csvParser from 'csv-parser';
 import express from 'express';
 export const router=express();
 
-function readDataFromCSV(file) {
+export function readDataFromCSV(file) {
     const read = fs.createReadStream(file, {encoding: 'utf8'}).pipe(csvParser());
     let data = [];
     read.on('error', () => {
