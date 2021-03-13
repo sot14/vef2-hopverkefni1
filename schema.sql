@@ -40,6 +40,7 @@ CREATE TABLE IF NOT EXISTS users(
   id serial primary key,
   username character varying(255) NOT NULL unique,
   password character varying(255) NOT NULL unique, --ath check (len(password) > 8)
+  email character varchar(255) NOT NULL unique,
   admin boolean default false
 );
 
