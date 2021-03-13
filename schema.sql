@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS series(
 
 CREATE TABLE IF NOT EXISTS genre(  
     id serial primary key, 
-    name varchar(128) not null,
+    name varchar(128) not null
 );
 
 -- tengitafla - series-genre
@@ -39,7 +39,8 @@ CREATE TABLE IF NOT EXISTS episodes(
 CREATE TABLE IF NOT EXISTS users(
   id serial primary key,
   username character varying(255) NOT NULL unique,
-  password character varying(255) NOT NULL unique,--(check password > 9),
+  password character varying(255) NOT NULL unique, --ath check (len(password) > 8)
+  email character varchar(255) NOT NULL unique,
   admin boolean default false
 );
 
