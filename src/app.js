@@ -86,6 +86,7 @@ app.use((req, res, next) => {
   next();
 });
 
+// login virkini fyrir admin 
 app.post(
   '/login-admin', passport.authenticate('local', {
     failureMessage: 'Notandi eða lykilorð vitlaust.',
@@ -93,10 +94,19 @@ app.post(
   }),
   (req, res) => res.redirect('/admin')
 );
+// login virkni fyrir users
 app.post(
   '/login', passport.authenticate('local', {
     failureMessage: 'Notandi eða lykilorð vitlaust.',
     failureRedirect: '/users/user-login',
+  }),
+  (req, res) => res.redirect('/users')
+);
+// login virkni fyrir nýskráningar
+app.post(
+  '/register', passport.authenticate('local', {
+    failureMessage: 'Notandi eða lykilorð vitlaust.',
+    failureRedirect: '/register',
   }),
   (req, res) => res.redirect('/users')
 );
@@ -153,7 +163,9 @@ function errorHandler(err, req, res, next) {
   const text = '';
   res.status(500).render('error', { title, text });
 }
-
+app.get('/register', (req, res) => {
+  res.render('register');
+});
 app.use((req, res, next) => {
   if (req.isAuthenticated()) {
     res.locals.user = req.user;
