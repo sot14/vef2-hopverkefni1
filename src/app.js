@@ -92,7 +92,7 @@ app.use((req, res, next) => {
 app.post(
   '/login', passport.authenticate('local', {
     failureMessage: 'Notandi eða lykilorð vitlaust.',
-    failureRedirect: '/users/user-login',
+    failureRedirect: '/users/login',
   }),
   (req, res) => res.redirect('/users')
 );
@@ -121,9 +121,11 @@ app.locals.formatDate = (str) => {
 
   return date;
 };
+
 app.get('/', (req, res) => {
   res.render('index');
 });
+
 app.get('/genres', (req, res) => {
   res.render('genres');
 });
