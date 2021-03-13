@@ -10,6 +10,7 @@ export const router = express.Router();
  * @returns {function} Middleware með villumeðhöndlun
  */
 
+
 const index = async (req, res) => {
   if (!req.isAuthenticated()) {
     return res.redirect('/admin/login-admin')

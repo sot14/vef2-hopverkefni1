@@ -12,14 +12,14 @@ export const router = express.Router();
 
 const index = async (req, res) => {
   if (!req.isAuthenticated()) {
-    return res.redirect('/admin/login-admin')
+    return res.redirect('/users/register')
   }
   res.render('register');
 }
 
 const login = async (req, res) => {
   if (req.isAuthenticated()) {
-    return res.redirect('/register')
+    return res.redirect('/users/register')
   }
   let message = '';
 
@@ -29,8 +29,8 @@ const login = async (req, res) => {
     message = req.session.messages.join(', ');
     req.session.messages = [];
   }
-  res.render('register', { message})
+  res.render('tv', { message})
 }
 
-router.get('/register', catchErrors(login));
+router.get('/users/register', catchErrors(login));
 router.get('/', catchErrors(index));
