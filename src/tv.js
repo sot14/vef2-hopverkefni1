@@ -1,24 +1,29 @@
 import fs from 'fs';
-import csv from 'csv-parser';
+import csvParser from 'csv-parser';
 
-const read = fs.createReadStream('./data/series.csv', {encoding: 'utf8'});
-let data = [];
-read.pipe(csv({headers: false, seperator: ','}));
-read.on('data', (chunk) => {
-    let item = {
-        bla: chunk[0],
-        blabla: chunk[1],
-        blablabla: chunk[2]
-    }
-    data.push(item);
-  console.log('chunk', chunk);
-});
+function readDataFromCSV(file) {
+    const read = fs.createReadStream(file, {encoding: 'utf8'}).pipe(csvParser());
+    let data = [];
+    read.on('error', () => {
+        console.log("error");
+    });
 
-read.on('close', () => {
-  console.log('file read');
-});
+    read.on('data', (chunk) => {
+        data.push(chunk);
+    });
 
-read.on('end', () => {
-    console.log("data", data);
+    read.on('close', () => {
+    console.log('file read');
+    });
+
+    read.on('end', () => {
+        console.log("data", data);
+        return data;
+    })
     return data;
-})
+}
+
+readDataFromCSV('./data/series.csv');
+readDataFromCSV('./data/seasons.csv');
+readDataFromCSV('./data/episodes.csv');
+
