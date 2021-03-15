@@ -88,6 +88,13 @@ app.use((req, res, next) => {
 });
 
 // login virkini fyrir admin 
+app.post(
+  '/login-admin', passport.authenticate('local', {
+    failureMessage: 'Notandi eða lykilorð vitlaust.',
+    failureRedirect: '/admin/admin-login',
+  }),
+  (req, res) => res.redirect('/admin')
+);
 
 // login virkni fyrir users
 app.post(
