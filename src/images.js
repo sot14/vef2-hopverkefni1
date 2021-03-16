@@ -3,13 +3,15 @@ import fs from 'fs';
 import path from 'path';
 import cloudinary from 'cloudinary';
 import dotenv from 'dotenv';
+import express from 'express';
 
 const readDirAsync = util.promisify(fs.readdir);
 const statAsync = util.promisify(fs.stat);
 const resourcesAsync = util.promisify(cloudinary.api.resources);
 const uploadAsync = util.promisify(cloudinary.uploader.upload);
-console.log('resourcesAsync', cloudinary.api.resources);
-console.log('uploadasync', cloudinary.uploader.upload);
+
+export const router = express.Router();
+
 
 // Cloudinary er stillt sjálfkrafa því við höfum CLOUDINARY_URL í umhverfi
 
@@ -22,11 +24,11 @@ const {
 
 dotenv.config();
 
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET
-});
+// cloudinary.config({
+//   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+//   api_key: process.env.CLOUDINARY_API_KEY,
+//   api_secret: process.env.CLOUDINARY_API_SECRET
+// });
 
 async function listImages() {
   if (cachedListImages) {
@@ -38,8 +40,9 @@ async function listImages() {
   // en þar sem við erum með 20 myndir fáum við hámark per request og látum duga
   const res = await resourcesAsync({ max_results: 100 });
 
-  console.log('resourcesasync', res);
+  console.log('resourcesasync', res.resources);
   cachedListImages = res.resources;
+  console.log(cachedListImages);
 
   return res.resources;
 }
@@ -51,6 +54,7 @@ function imageComparer(current) {
 
 async function getImageIfUploaded(imagePath) {
   const uploaded = await listImages();
+  console.log('back from listimages');
 
   const stat = await statAsync(imagePath);
 
@@ -100,5 +104,7 @@ export async function uploadImagesFromDisk(imageDir) {
   return images;
 }
 
-uploadImagesFromDisk('./data/img');
+// router.get('/', uploadImagesFromDisk('./data/img'));
+uploadImagesFromDisk('./data/img')
+
 

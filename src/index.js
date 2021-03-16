@@ -37,16 +37,70 @@ function indexRoute(req, res) {
                 methods: ['POST', 'PATCH', 'DELETE']
             }
         },
+        seasons: {
+            seasons: {
+                href: '/tv/{id}/season',
+                methods: ['GET','POST']
+            },
+            season: {
+                href: '/tv/{id}/season/{season}',
+                methods: ['GET', 'DELETE']
+            }
+        },
+        episodes: {
+            episodes: {
+                href: '/tv/{id}/season/{season}/episode',
+                methods: ['POST']
+            },
+            episode: {
+                href: '/tv{id}/season/{season}/episode/{episode}',
+                methods: ['GET', 'DELETE']
+            }
+        },
+        genres: {
+            genres: {
+                href: '/genres',
+                methods: ['GET', 'POST']
+            }
+        },
         users: {
-            users: '/users',
-            user: '/users/{id}',
-            register: '/users/register',
-            login: '/users/login',
-            me: '/users/me',
-        }, 
+            users: {
+                href: '/users',
+                methods: ['GET']
+            },
+            user: {
+                href: '/users/{id}',
+                methods: ['GET', 'PATCH']
+            },
+            register: {
+                href: '/users/register',
+                methods: ['POST']
+            },
+            login: {
+                href: '/users/login',
+                methods: ['POST']
+            },
+            me: {
+                href: '/users/me',
+                methods: ['GET', 'PATCH']
+            }
+        }
 
     })
-}
+};
+
+
+router.use('/', indexRoute);
+//         users: {
+//             users: '/users',
+//             user: '/users/{id}',
+//             register: '/users/register',
+//             login: '/users/login',
+//             me: '/users/me',
+//         }, 
+
+//     })
+// }
 router.use('/', indexRoute);
 router.get('/users', requireAdmin, catchErrors(listUsers));
 /*
