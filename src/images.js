@@ -4,6 +4,7 @@ import path from 'path';
 import cloudinary from 'cloudinary';
 import dotenv from 'dotenv';
 import express from 'express';
+import { requireEnv } from './utils.js'
 
 const readDirAsync = util.promisify(fs.readdir);
 const statAsync = util.promisify(fs.stat);
@@ -12,7 +13,7 @@ const uploadAsync = util.promisify(cloudinary.uploader.upload);
 
 export const router = express.Router();
 
-
+requireEnv(['CLOUDINARY_URL']);
 // Cloudinary er stillt sjálfkrafa því við höfum CLOUDINARY_URL í umhverfi
 
 // Geymum í minni niðurstöður úr því að lista allar myndir frá Cloudinary
