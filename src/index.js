@@ -7,7 +7,7 @@ const requireAdmin = [
     checkUserIsAdmin,
 ];
 
-export const router = express();
+export const router = express.Router();
 
 import {
     listUsers,
