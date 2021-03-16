@@ -2,187 +2,47 @@ import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import express from 'express';
 import dotenv from 'dotenv';
-import fns from 'date-fns';
 
-import { router as adminRouter } from './admin.js';
-import { strat, serializeUser, deserializeUser } from './users.js';
-import {router as regRouter } from './registered.js';
-import {router as TVrouter} from './tv.js';
-import {series} from './tv.js';
-// Library middleware fyrir express
-import passport from 'passport';
-import passportLocal from 'passport-local';
-import session from 'express-session';
+import { router as indexRoute } from './index.js'
+import { app as auth } from '../authentication/registered.js';
 
-const { format } = fns;
-const { Strategy } = passportLocal;
-const sessionSecret = "Leyndarmál"
+import { requireEnv } from './utils.js'
 
+
+requireEnv(['DATABASE_URL', 'JWT_SECRET']);
+//requireEnv(['DATABASE_URL', 'CLOUDINARY_URL', 'JWT_SECRET']);
 dotenv.config();
 
 const {
   PORT: port = 3000,
 } = process.env;
 
-if (!sessionSecret) {
-  console.error('Add SESSION_SECRET to .env');
-  process.exit(1);
-}
-
 const app = express();
 
 // Sér um að req.body innihaldi gögn úr formi
 app.use(express.urlencoded({ extended: true }));
 
-app.use(session({
-  name: 'counter.sid',
-  secret: sessionSecret,
-  resave: false,
-  saveUninitialized: false,
-  maxAge: 20 * 1000, // 20 sek 
-}));
-
-passport.use(new Strategy(strat));
-passport.serializeUser(serializeUser);
-passport.deserializeUser(deserializeUser);
-
-// Látum express nota passport með session
-app.use(passport.initialize());
-app.use(passport.session());
+app.use(auth);
+app.use('/', indexRoute);
 
 const path = dirname(fileURLToPath(import.meta.url));
 
 app.use(express.static(join(path, '../public')));
 
-app.set('views', join(path, '../views'));
-app.set('view engine', 'ejs');
-
-/**
- * Hjálparfall til að athuga hvort reitur sé gildur eða ekki.
- *
- * @param {string} field Middleware sem grípa á villur fyrir
- * @param {array} errors Fylki af villum frá express-validator pakkanum
- * @returns {boolean} `true` ef `field` er í `errors`, `false` annars
- */
-function isInvalid(field, errors = []) {
-  // Boolean skilar `true` ef gildi er truthy (eitthvað fannst)
-  // eða `false` ef gildi er falsy (ekkert fannst: null)
-  return Boolean(errors.find((i) => i && i.param === field));
+function notFoundHandler(req, res, next) { // eslint-disable-line
+  console.warn('Not found', req.originalUrl);
+  res.status(404).json({ error: 'Not found' });
 }
 
-app.locals.isInvalid = isInvalid;
-
-app.use((req, res, next) => {
-  res.locals.user = req.isAuthenticated() ? req.user : null;
-
-  next();
-});
-
-// Gott að skilgreina eitthvað svona til að gera user hlut aðgengilegan í
-// viewum ef við erum að nota þannig
-app.use((req, res, next) => {
-  if (req.isAuthenticated()) {
-    res.locals.user = req.user;
-  }
-  next();
-});
-
-// login virkini fyrir admin 
-app.post(
-  '/login-admin', passport.authenticate('local', {
-    failureMessage: 'Notandi eða lykilorð vitlaust.',
-    failureRedirect: '/admin/admin-login',
-  }),
-  (req, res) => res.redirect('/admin')
-);
-
-// login virkni fyrir users
-app.post(
-  '/login', passport.authenticate('local', {
-    failureMessage: 'Notandi eða lykilorð vitlaust.',
-    failureRedirect: '/users/login',
-  }),
-  (req, res) => res.redirect('/users')
-);
-// login virkni fyrir nýskráningar
-app.post(
-  '/users/register', passport.authenticate('local', {
-    failureMessage: 'Notandi eða lykilorð vitlaust.',
-    failureRedirect: '/register',
-  }),
-  (req, res) => res.redirect('/users')
-);
-
-app.get('/logout', (req, res) => {
-  req.logout();
-  res.redirect('/');
-});
-
-app.locals.formatDate = (str) => {
-  let date = '';
-
-  try {
-    date = format(str || '', 'dd.MM.yyyy');
-  } catch {
-    return '';
-  }
-
-  return date;
-};
-
-app.get('/', (req, res) => {
-  res.render('index',{series});
-});
-
-app.get('/genres', (req, res) => {
-  res.render('genres');
-});
-
-
-//app.use('/', registrationRouter);
-app.use('/admin', adminRouter);
-app.use('/users', regRouter);
-app.use('/tv', TVrouter);
-
-
-/**
- * Middleware sem sér um 404 villur.
- *
- * @param {object} req Request hlutur
- * @param {object} res Response hlutur
- * @param {function} next Næsta middleware
- */
-// eslint-disable-next-line no-unused-vars
-function notFoundHandler(req, res, next) {
-  const title = 'Síða fannst ekki';
-  const text = ''
-  res.status(404).render('error', { title, text });
-}
-
-/**
- * Middleware sem sér um villumeðhöndlun.
- *
- * @param {object} err Villa sem kom upp
- * @param {object} req Request hlutur
- * @param {object} res Response hlutur
- * @param {function} next Næsta middleware
- */
-// eslint-disable-next-line no-unused-vars
-function errorHandler(err, req, res, next) {
+function errorHandler(err, req, res, next) { // eslint-disable-line
   console.error(err);
-  const title = 'Villa kom upp';
-  const text = '';
-  res.status(500).render('error', { title, text });
-}
-app.get('/users/register', (req, res) => {
-  res.render('register');
-});
-app.use((req, res, next) => {
-  if (req.isAuthenticated()) {
-    res.locals.user = req.user;
+
+  if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
+    return res.status(400).json({ error: 'Invalid json' });
   }
-  next();
-});
+
+  return res.status(500).json({ error: 'Internal server error' });
+}
 
 app.use(notFoundHandler);
 app.use(errorHandler);
