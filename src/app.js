@@ -8,6 +8,8 @@ import { router as adminRouter } from './admin.js';
 import { strat, serializeUser, deserializeUser } from './users.js';
 import {router as regRouter } from './registered.js';
 import {router as TVrouter} from './tv.js';
+import {router as indexRouter} from './index.js';
+import {router as imageRouter} from './images.js';
 import {series} from './tv.js';
 // Library middleware fyrir express
 import passport from 'passport';
@@ -123,9 +125,9 @@ app.locals.formatDate = (str) => {
   return date;
 };
 
-app.get('/', (req, res) => {
-  res.render('index',{series});
-});
+// app.get('/', (req, res) => {
+//   res.render('index',{series});
+// });
 
 app.get('/genres', (req, res) => {
   res.render('genres');
@@ -133,6 +135,7 @@ app.get('/genres', (req, res) => {
 
 
 //app.use('/', registrationRouter);
+app.use('/', indexRouter);
 app.use('/admin', adminRouter);
 app.use('/users', regRouter);
 app.use('/tv', TVrouter);

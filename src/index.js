@@ -1,3 +1,7 @@
+import express from 'express';
+
+
+export const router = express.Router();
 
 function indexRoute(req, res) {
     return res.json({
@@ -18,9 +22,58 @@ function indexRoute(req, res) {
                 href: '/tv/{id}/state',
                 methods: ['POST', 'PATCH', 'DELETE']
             }
+        },
+        seasons: {
+            seasons: {
+                href: '/tv/{id}/season',
+                methods: ['GET','POST']
+            },
+            season: {
+                href: '/tv/{id}/season/{season}',
+                methods: ['GET', 'DELETE']
+            }
+        },
+        episodes: {
+            episodes: {
+                href: '/tv/{id}/season/{season}/episode',
+                methods: ['POST']
+            },
+            episode: {
+                href: '/tv{id}/season/{season}/episode/{episode}',
+                methods: ['GET', 'DELETE']
+            }
+        },
+        genres: {
+            genres: {
+                href: '/genres',
+                methods: ['GET', 'POST']
+            }
+        },
+        users: {
+            users: {
+                href: '/users',
+                methods: ['GET']
+            },
+            user: {
+                href: '/users/{id}',
+                methods: ['GET', 'PATCH']
+            },
+            register: {
+                href: '/users/register',
+                methods: ['POST']
+            },
+            login: {
+                href: '/users/login',
+                methods: ['POST']
+            },
+            me: {
+                href: '/users/me',
+                methods: ['GET', 'PATCH']
+            }
         }
 
     })
 };
+
 
 router.use('/', indexRoute);
