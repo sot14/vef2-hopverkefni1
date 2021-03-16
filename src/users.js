@@ -1,118 +1,121 @@
-import bcrypt from 'bcrypt';
+import {
+    validateUser,
+    updateUser,
+    findById,
+} from '../authentication/users.js';
 
-const records = [
-    {
-      id: 1,
-      username: 'admin',
-  
-      // 123
-      password: '$2a$11$pgj3.zySyFOvIQEpD7W6Aund1Tw.BFarXxgLJxLbrzIv/4Nteisii',
-      admin: true,
-    },
-    {
-      id: 2,
-      username: 'oli',
-  
-      // 123
-      password: '$2a$11$pgj3.zySyFOvIQEpD7W6Aund1Tw.BFarXxgLJxLbrzIv/4Nteisii',
-      admin: false,
-    },
-  ];
-  
-export async function comparePasswords(password, user) {
-  const ok = await bcrypt.compare(password, user.password);
+import { query, pagedQuery } from './db.js';
+import { isBoolean } from '../authentication/validations.js';
+import { addPageMetadata } from './utils.js';
 
-  if (ok) {
-    return user;
-  }
+export async function listUsers(req, res) {
+    const { offset = 0, limit = 10 } = req.query;
 
-  return false;
-}
-// Merkjum sem async þó ekki verið að nota await, þar sem þetta er notað í
-// app.js gerir ráð fyrir async falli
-export async function findByUsername(username) {
-    const found = records.find((u) => u.username === username);
-  
-    if (found) {
-      return found;
-    }
-  
-    return null;
-  }
-  
-  // Merkjum sem async þó ekki verið að nota await, þar sem þetta er notað í
-  // app.js gerir ráð fyrir async falli
-  export async function findById(id) {
-    const found = records.find((u) => u.id === id);
-  
-    if (found) {
-      return found;
-    }
-  
-    return null;
-  }
-/* *******+  Notum þegar við erum komnar með db  ***********
+    const users = await pagedQuery(
+        `SELECT
+        id, username, email, admin, created, updated
+      FROM
+        users
+      ORDER BY updated DESC`,
+        [],
+        { offset, limit },
+    );
 
-export async function findByUsername(username) {
-  const q = 'SELECT * FROM users WHERE username = $1';
+    const usersWithPage = addPageMetadata(
+        users,
+        req.path,
+        {
+            offset, limit, length: users.items.length,
+        });
 
-  const result = await query(q, [username]);
 
-  if (result.rowCount === 1) {
-    return result.rows[0];
-  }
-
-  return null;
+    return res.json(usersWithPage);
 }
 
-export async function findById(id) {
-  const q = 'SELECT * FROM users WHERE id = $1';
+export async function listUser(req, res) {
+    const { id } = req.params;
 
-  const result = await query(q, [id]);
-
-  if (result.rowCount === 1) {
-    return result.rows[0];
-  }
-  return null;
-}*/
-
-// Hvernig við actually auðkennum - tengi við strategy í app.js
-/**
- * Athugar hvort username og password sé til í notandakerfi.
- * Callback tekur við villu sem fyrsta argument, annað argument er
- * - `false` ef notandi ekki til eða lykilorð vitlaust
- * - Notandahlutur ef rétt
- *
- * @param {string} username Notandanafn til að athuga
- * @param {string} password Lykilorð til að athuga
- * @param {function} done Fall sem kallað er í með niðurstöðu
- * */
-export async function strat(username, password, done) {
-  try {
-    const user = await findByUsername(username);
+    const user = await findById(id);
 
     if (!user) {
-      return done(null, false);
+        return res.status(404).json({ error: 'User not found' });
     }
 
-    // Verður annað hvort notanda hlutur ef lykilorð rétt, eða false
-    const result = await comparePasswords(password, user);
-    return done(null, result);
-  } catch (err) {
-    console.error(err);
-    return done(err);
-  }
+    return res.json(user);
 }
 
-export function serializeUser(user, done) {
-  done(null, user.id);
-}
+export async function updateUserRoute(req, res) {
+    const { id } = req.params;
+    const { user: currentUser } = req;
+    const { admin } = req.body;
 
-export async function deserializeUser(id, done) {
-  try {
     const user = await findById(id);
-    done(null, user);
-  } catch (err) {
-    done(err);
-  }
+
+    if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+    }
+
+    if (!isBoolean(admin)) {
+        return res.status(400).json({
+            errors: [{
+                field: 'admin',
+                error: 'Must be a boolean',
+            }],
+        });
+    }
+
+    if (!admin && (currentUser.id === Number(id))) {
+        return res.status(400).json({
+            error: 'Can not remove admin privileges from self',
+        });
+    }
+
+    const q = `
+      UPDATE
+        users
+      SET admin = $1, updated = current_timestamp
+      WHERE id = $2
+      RETURNING
+        id, username, email, admin, created, updated`;
+    const result = await query(q, [Boolean(admin), id]);
+
+    return res.status(201).json(result.rows[0]);
+}
+
+export async function currentUserRoute(req, res) {
+    const { user: { id } = {} } = req;
+
+    const user = await findById(id);
+
+    if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+    }
+
+    return res.json(user);
+}
+
+export async function updateCurrentUser(req, res) {
+    const { id } = req.user;
+
+    const user = await findById(id);
+
+    if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+    }
+
+    const { password, email } = req.body;
+
+    const validationMessage = await validateUser({ password, email }, true, id);
+
+    if (validationMessage.length > 0) {
+        return res.status(400).json({ errors: validationMessage });
+    }
+
+    const result = await updateUser(id, password, email);
+
+    if (!result) {
+        return res.status(400).json({ error: 'Nothing to update' });
+    }
+
+    return res.status(200).json(result);
 }

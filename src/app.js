@@ -2,6 +2,7 @@ import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import express from 'express';
 import dotenv from 'dotenv';
+<<<<<<< HEAD
 import fns from 'date-fns';
 
 import { router as adminRouter } from './admin.js';
@@ -19,109 +20,48 @@ import session from 'express-session';
 const { format } = fns;
 const { Strategy } = passportLocal;
 const sessionSecret = "Leyndarmál"
+=======
+>>>>>>> 527b1a70a326c1bda7b0a588f78be6ad5343a4bd
 
+import { router as indexRoute } from './index.js'
+import { app as auth } from '../authentication/registered.js';
+
+import { requireEnv } from './utils.js'
+
+
+requireEnv(['DATABASE_URL', 'JWT_SECRET']);
+//requireEnv(['DATABASE_URL', 'CLOUDINARY_URL', 'JWT_SECRET']);
 dotenv.config();
 
 const {
   PORT: port = 3000,
 } = process.env;
 
-if (!sessionSecret) {
-  console.error('Add SESSION_SECRET to .env');
-  process.exit(1);
-}
-
 const app = express();
 
 // Sér um að req.body innihaldi gögn úr formi
 app.use(express.urlencoded({ extended: true }));
 
-app.use(session({
-  name: 'counter.sid',
-  secret: sessionSecret,
-  resave: false,
-  saveUninitialized: false,
-  maxAge: 20 * 1000, // 20 sek 
-}));
-
-passport.use(new Strategy(strat));
-passport.serializeUser(serializeUser);
-passport.deserializeUser(deserializeUser);
-
-// Látum express nota passport með session
-app.use(passport.initialize());
-app.use(passport.session());
+app.use(auth);
+app.use('/', indexRoute);
 
 const path = dirname(fileURLToPath(import.meta.url));
 
 app.use(express.static(join(path, '../public')));
 
-app.set('views', join(path, '../views'));
-app.set('view engine', 'ejs');
-
-/**
- * Hjálparfall til að athuga hvort reitur sé gildur eða ekki.
- *
- * @param {string} field Middleware sem grípa á villur fyrir
- * @param {array} errors Fylki af villum frá express-validator pakkanum
- * @returns {boolean} `true` ef `field` er í `errors`, `false` annars
- */
-function isInvalid(field, errors = []) {
-  // Boolean skilar `true` ef gildi er truthy (eitthvað fannst)
-  // eða `false` ef gildi er falsy (ekkert fannst: null)
-  return Boolean(errors.find((i) => i && i.param === field));
+function notFoundHandler(req, res, next) { // eslint-disable-line
+  console.warn('Not found', req.originalUrl);
+  res.status(404).json({ error: 'Not found' });
 }
 
-app.locals.isInvalid = isInvalid;
+function errorHandler(err, req, res, next) { // eslint-disable-line
+  console.error(err);
 
-app.use((req, res, next) => {
-  res.locals.user = req.isAuthenticated() ? req.user : null;
-
-  next();
-});
-
-// Gott að skilgreina eitthvað svona til að gera user hlut aðgengilegan í
-// viewum ef við erum að nota þannig
-app.use((req, res, next) => {
-  if (req.isAuthenticated()) {
-    res.locals.user = req.user;
-  }
-  next();
-});
-
-// login virkini fyrir admin 
-
-// login virkni fyrir users
-app.post(
-  '/login', passport.authenticate('local', {
-    failureMessage: 'Notandi eða lykilorð vitlaust.',
-    failureRedirect: '/users/login',
-  }),
-  (req, res) => res.redirect('/users')
-);
-// login virkni fyrir nýskráningar
-app.post(
-  '/users/register', passport.authenticate('local', {
-    failureMessage: 'Notandi eða lykilorð vitlaust.',
-    failureRedirect: '/register',
-  }),
-  (req, res) => res.redirect('/users')
-);
-
-app.get('/logout', (req, res) => {
-  req.logout();
-  res.redirect('/');
-});
-
-app.locals.formatDate = (str) => {
-  let date = '';
-
-  try {
-    date = format(str || '', 'dd.MM.yyyy');
-  } catch {
-    return '';
+  if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
+    return res.status(400).json({ error: 'Invalid json' });
   }
 
+<<<<<<< HEAD
   return date;
 };
 
@@ -169,16 +109,10 @@ function errorHandler(err, req, res, next) {
   const title = 'Villa kom upp';
   const text = '';
   res.status(500).render('error', { title, text });
+=======
+  return res.status(500).json({ error: 'Internal server error' });
+>>>>>>> 527b1a70a326c1bda7b0a588f78be6ad5343a4bd
 }
-app.get('/users/register', (req, res) => {
-  res.render('register');
-});
-app.use((req, res, next) => {
-  if (req.isAuthenticated()) {
-    res.locals.user = req.user;
-  }
-  next();
-});
 
 app.use(notFoundHandler);
 app.use(errorHandler);
