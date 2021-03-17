@@ -6,7 +6,7 @@ import dotenv from 'dotenv';
 import { router as indexRoute } from './index.js'
 import { app as auth } from '../authentication/registered.js';
 
-import { requireEnv } from './utils.js'
+import { requireEnv } from './utils.js';
 
 
 requireEnv(['DATABASE_URL', 'CLOUDINARY_URL', 'JWT_SECRET']);

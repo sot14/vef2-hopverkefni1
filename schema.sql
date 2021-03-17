@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS genre(
     name varchar(128) not null
 );
 
+-- tengitafla - series-genre
 CREATE TABLE IF NOT EXISTS serie_genre(
   id serial primary key,
   serie serial foreign key REFERENCES series(id),
