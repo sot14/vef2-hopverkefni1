@@ -7,10 +7,9 @@ import { router as indexRoute } from './index.js'
 import { app as auth } from '../authentication/registered.js';
 
 import { requireEnv } from './utils.js';
-
+dotenv.config();
 
 requireEnv(['DATABASE_URL', 'CLOUDINARY_URL', 'JWT_SECRET']);
-dotenv.config();
 
 const {
   PORT: port = 3000,

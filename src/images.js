@@ -13,9 +13,8 @@ const resourcesAsync = util.promisify(v2.api.resources);
 const uploadAsync = util.promisify(v2.uploader.upload);
 
 export const router = express.Router();
-
+dotenv.config();
 // Cloudinary er stillt sjálfkrafa því við höfum CLOUDINARY_URL í umhverfi
-
 // Geymum í minni niðurstöður úr því að lista allar myndir frá Cloudinary
 let cachedListImages = null;
 
@@ -23,6 +22,12 @@ const {
   PORT: port = 3000,
   CLOUDINARY_URL: cloudinaryUrl,
 } = process.env;
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 dotenv.config();
 

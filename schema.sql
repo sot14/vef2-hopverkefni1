@@ -1,14 +1,14 @@
 CREATE TABLE IF NOT EXISTS series(
   id serial primary key,
   name varchar(128) not null,
-  airDate date,
-  genres VARCHAR (255) not null,
+  aired date,
+  genres VARCHAR (255),
   inProduction boolean,
   tagline varchar(128),
   thumbnail varchar (255) not null,
   description varchar (1024),
   language varchar (64),
-  network varchar (64),
+  url varchar (64),
   homepage varchar (255)
 );
 
