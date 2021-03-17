@@ -19,6 +19,7 @@ export async function readDataFromCSV(file) {
     });
 
     read.on('end', () => {
+        console.log("data: ",data)
         return data;
     })
     return data;
@@ -28,8 +29,8 @@ router.get('/', (req, res) => {
     res.render('tv');
   });
 
-//export const series = readDataFromCSV('./data/series.csv');
-export const seasons = readDataFromCSV('../data/seasons.csv');
+export const series = readDataFromCSV('../data/series.csv');
+//export const seasons = readDataFromCSV('../data/seasons.csv');
 //export const episodes = readDataFromCSV('./data/episodes.csv');
 
 

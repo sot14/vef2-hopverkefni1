@@ -29,8 +29,6 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-dotenv.config();
-
 async function listImages() {
   if (cachedListImages) {
     return Promise.resolve(cachedListImages);

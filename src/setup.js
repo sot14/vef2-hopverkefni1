@@ -15,7 +15,7 @@ dotenv.config();
 async function main () {
     console.info(`Set upp gagnagrunn á ${databaseUrl}`);
     console.info(`Set uppp tengingu við Cloudinary á ${cloudinaryUrl}`);
-    let images = [];
+  /*  let images = [];
     try {
         console.log(imageFolder);
         images = uploadImagesFromDisk(imageFolder);
@@ -23,21 +23,23 @@ async function main () {
         console.error('Villa við að senda myndir', e);
     }
 
-    console.log(images);
+    console.log(images);*/
     const series = await readDataFromCSV('../data/series.csv');
     setTimeout(() => {
         console.log(series.length);
         series.forEach((serie) => {
         
             let result = [];
-            const queryString = `INSERT INTO series(name, aired, inProduction, tagline, thumbnail, description, language, url, homepage) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9);`;
+            const queryString = `INSERT INTO series(id, name, aired, genres, inProduction, tagline, thumbnail, description, language, network, url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11);`;
             
             const values = [
+                serie.id,
                 serie.name,
                 serie.airDate,
+                serie.genres,
                 serie.inProduction,
                 serie.tagline,
-                serie.image, // TODO: rétt image
+                serie.image, 
                 serie.description,
                 serie.language,
                 serie.network,
