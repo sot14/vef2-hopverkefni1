@@ -8,8 +8,8 @@ CREATE TABLE IF NOT EXISTS series(
   thumbnail varchar (255) not null,
   description varchar (1024),
   language varchar (64),
-  url varchar (64),
-  homepage varchar (255)
+  network varchar (64),
+  url varchar (255)
 );
 
 CREATE TABLE IF NOT EXISTS genres(  
