@@ -101,7 +101,7 @@ router.patch('/users/me', requireAuth, catchErrors(updateCurrentUser));
 
 // Routes fyrir tv
 
-router.get('/tv:id', requireAdmin, catchErrors(listUsers));
-router.get('/users/:id', requireAdmin, catchErrors(listUser));
+router.get('/tv:id', requireAdmin, catchErrors());
+router.get('/users/:id', requireAdmin, catchErrors());
 
 

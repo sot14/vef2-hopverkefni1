@@ -1,14 +1,15 @@
 CREATE TABLE IF NOT EXISTS series(
   id serial primary key,
   name varchar(128) not null,
-  aired date,
+  airDate date,
+  genres VARCHAR (255) not null,
   inProduction boolean,
   tagline varchar(64),
-  thumbnail varchar (255) not null,
+  image varchar (255) not null,
   description varchar (1024),
   language varchar (64),
   network varchar (64),
-  url varchar (255)
+  homepage varchar (255)
 );
 
 CREATE TABLE IF NOT EXISTS genre(  
@@ -16,10 +17,12 @@ CREATE TABLE IF NOT EXISTS genre(
     name varchar(128) not null
 );
 
--- tengitafla - series-genre
 CREATE TABLE IF NOT EXISTS serie_genre(
+  id serial primary key,
   serie serial foreign key REFERENCES series(id),
-  genre serial foreign key REFERENCES genre(id)
+  genre serial foreign key REFERENCES genre(id),
+  CONSTRAINT serie FOREIGN KEY (serie) REFERENCES series (id),
+  CONSTRAINT genre FOREIGN KEY (genre) REFERENCES genres (id)
 );
 
 
@@ -29,7 +32,8 @@ CREATE TABLE IF NOT EXISTS season(
     seasonNo integer not null check ( seasonNo > 0),
     aired date,
     seasonPoster varchar (255),
-    serie serial foreign key REFERENCES series (id)
+    serie INTEGER NOT NULL,
+    CONSTRAINT serie FOREIGN KEY (serie) REFERENCES series (id)
 );
 
 CREATE TABLE IF NOT EXISTS episodes(
