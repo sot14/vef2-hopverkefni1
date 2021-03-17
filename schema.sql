@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS series(
   url varchar (255)
 );
 
-CREATE TABLE IF NOT EXISTS genre(  
+CREATE TABLE IF NOT EXISTS genres(  
     id serial primary key, 
     name varchar(128) not null
 );
