@@ -19,6 +19,7 @@ let cachedListImages = null;
 
 const {
   PORT: port = 3000,
+  CLOUDINARY_URL: cloudinaryUrl,
 } = process.env;
 
 dotenv.config();
@@ -27,9 +28,11 @@ async function listImages() {
   if (cachedListImages) {
     return Promise.resolve(cachedListImages);
   }
+  console.log('before resourcesasync');
   // TODO hér þyrfti að taka við pageuðum niðurstöðum frá Cloudinary
   // en þar sem við erum með 20 myndir fáum við hámark per request og látum duga
   const res = await resourcesAsync({ max_results: 100 });
+  console.log('after resourcesasync');
   cachedListImages = res.resources;
   console.log(cachedListImages);
 
@@ -75,7 +78,7 @@ export async function uploadImagesFromDisk(imageDir) {
   const filteredImages = imagesFromDisk
     .filter(i => path.extname(i).toLowerCase() === '.jpg');
 
-  console.log(`Bæti við ${filteredImages.length} myndum`);
+  console.log(`Bæti við ${filteredImages.length} myndum á ${cloudinaryUrl}`);
 
   const images = [];
 

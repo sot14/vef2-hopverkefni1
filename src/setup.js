@@ -1,18 +1,29 @@
 import { uploadImagesFromDisk } from './images.js';
 import { readDataFromCSV } from './tv.js';
 import { query } from './db.js';
+import dotenv from 'dotenv';
 import csvParser from 'csv-parser';
 
+const {
+    DATABASE_URL: databaseUrl,
+    CLOUDINARY_URL: cloudinaryUrl,
+    IMAGE_FOLDER: imageFolder = './data/img',
+  } = process.env;
+
+dotenv.config();
 
 async function main () {
-    console.log('hello');
-    // let images = [];
-    // try {
-    //     images = uploadImagesFromDisk('./data/img');
-    // } catch(e) {
-    //     console.error('Villa við að senda myndir', e);
-    // }
+    console.info(`Set upp gagnagrunn á ${databaseUrl}`);
+    console.info(`Set uppp tengingu við Cloudinary á ${cloudinaryUrl}`);
+    let images = [];
+    try {
+        console.log(imageFolder);
+        images = uploadImagesFromDisk(imageFolder);
+    } catch(e) {
+        console.error('Villa við að senda myndir', e);
+    }
 
+    console.log(images);
     const series = await readDataFromCSV('./data/series.csv');
     setTimeout(() => {
         console.log(series.length);
