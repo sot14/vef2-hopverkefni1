@@ -4,15 +4,15 @@ CREATE TABLE IF NOT EXISTS series(
   airDate date,
   genres VARCHAR (255) not null,
   inProduction boolean,
-  tagline varchar(64),
-  image varchar (255) not null,
+  tagline varchar(128),
+  thumbnail varchar (255) not null,
   description varchar (1024),
   language varchar (64),
   network varchar (64),
   homepage varchar (255)
 );
 
-CREATE TABLE IF NOT EXISTS genre(  
+CREATE TABLE IF NOT EXISTS genres(  
     id serial primary key, 
     name varchar(128) not null
 );
