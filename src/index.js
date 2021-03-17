@@ -93,12 +93,8 @@ function indexRoute(req, res) {
 
 router.get('/',indexRoute);
 
-<<<<<<< HEAD
-//     })
-// }
 router.use('/images', imageRouter);
-=======
->>>>>>> b3082e571089dfae7b810c30b78ae88fdbbfdea1
+
 router.get('/users', requireAdmin, catchErrors(listUsers));
 router.get('/users/:id', requireAdmin, catchErrors(listUser));
 router.patch('/users/:id', requireAdmin, catchErrors(updateUserRoute));
