@@ -31,7 +31,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "browser-sync": "browser-sync start --server",
     "nodemon": "nodemon ./src/app.js",
-    "dev": "concurrently \"nodemon ./src/app.js\""
+    "dev": "concurrently \"nodemon ./src/app.js\"",
+    "setup": "node ./src/setup.js"
   },
   "repository": {
     "type": "git",

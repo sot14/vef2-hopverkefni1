@@ -3,7 +3,7 @@ import csvParser from 'csv-parser';
 import express from 'express';
 export const router=express();
 
-export function readDataFromCSV(file) {
+export async function readDataFromCSV(file) {
     const read = fs.createReadStream(file, {encoding: 'utf8'}).pipe(csvParser());
     let data = [];
     read.on('error', () => {
@@ -19,7 +19,6 @@ export function readDataFromCSV(file) {
     });
 
     read.on('end', () => {
-        console.log(data);
         return data;
     })
     return data;
@@ -29,10 +28,8 @@ router.get('/', (req, res) => {
     res.render('tv');
   });
 
-export const series = readDataFromCSV('./data/series.csv');
-//export const seasons = readDataFromCSV('./data/seasons.csv');
+//export const series = readDataFromCSV('./data/series.csv');
+export const seasons = readDataFromCSV('./data/seasons.csv');
 //export const episodes = readDataFromCSV('./data/episodes.csv');
-//readDataFromCSV('./data/seasons.csv');
-//readDataFromCSV('./data/episodes.csv');
 
 

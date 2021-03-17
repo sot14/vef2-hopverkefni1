@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS series(
   name varchar(128) not null,
   aired date,
   inProduction boolean,
-  tagline varchar(64),
+  tagline varchar(128),
   thumbnail varchar (255) not null,
   description varchar (1024),
   language varchar (64),
@@ -16,16 +16,6 @@ CREATE TABLE IF NOT EXISTS genre(
     name varchar(128) not null
 );
 
-<<<<<<< HEAD
-=======
--- tengitafla - series-genre
-CREATE TABLE IF NOT EXISTS serie_genre(
-  serie serial foreign key REFERENCES series(id),
-  genre serial foreign key REFERENCES genre(id)
-);
-
-
->>>>>>> b3082e571089dfae7b810c30b78ae88fdbbfdea1
 CREATE TABLE IF NOT EXISTS season(
     id serial primary key,
     name varchar(128) not null,
@@ -59,7 +49,6 @@ CREATE TABLE series_genres (
   CONSTRAINT FK_seriesGenres_genre FOREIGN KEY (genre) REFERENCES genres (id) ON DELETE CASCADE
 );
 
-<<<<<<< HEAD
 -- Tengitafla fyrir notendur og sjónvarpsþætti
 CREATE TABLE IF NOT EXISTS user_series(
   series serial foreign key REFERENCES series(id),
@@ -67,5 +56,3 @@ CREATE TABLE IF NOT EXISTS user_series(
   status varchar(64),
   rating integer check(rating < 6)
 )
-=======
->>>>>>> b3082e571089dfae7b810c30b78ae88fdbbfdea1
