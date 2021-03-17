@@ -13,7 +13,7 @@ export async function listUsers(req, res) {
 
     const users = await pagedQuery(
         `SELECT
-        id, username, email, admin, created, updated
+        id, username,password, email, admin 
       FROM
         users
       ORDER BY updated DESC`,
@@ -73,10 +73,10 @@ export async function updateUserRoute(req, res) {
     const q = `
       UPDATE
         users
-      SET admin = $1, updated = current_timestamp
+      SET admin = $1, 
       WHERE id = $2
       RETURNING
-        id, username, email, admin, created, updated`;
+       id, username,password, email, admin `;
     const result = await query(q, [Boolean(admin), id]);
 
     return res.status(201).json(result.rows[0]);

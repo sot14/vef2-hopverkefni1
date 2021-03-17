@@ -29,11 +29,17 @@ router.get('/', (req, res) => {
     res.render('tv');
   });
 
+<<<<<<< HEAD
 export const series = readDataFromCSV('./data/series.csv');
 //export const seasons = readDataFromCSV('./data/seasons.csv');
 //export const episodes = readDataFromCSV('./data/episodes.csv');
 
 console.log('here');
 console.log(series);
+=======
+export const series =readDataFromCSV('../data/series.csv');
+//readDataFromCSV('./data/seasons.csv');
+//readDataFromCSV('./data/episodes.csv');
+>>>>>>> b3082e571089dfae7b810c30b78ae88fdbbfdea1
 
 

@@ -12,10 +12,10 @@ export const router = express.Router();
 
 import {
     listUsers,
-    //listUser,
-    //updateUserRoute as updateUser,
-    //currentUserRoute as currentUser,
-    //updateCurrentUser,
+    listUser,
+    updateUserRoute, 
+    currentUserRoute,
+    updateCurrentUser,
 } from './users.js';
 
 function indexRoute(req, res) {
@@ -88,25 +88,27 @@ function indexRoute(req, res) {
         }
 
     })
-};
+}
 
 
-router.use('/', indexRoute);
-//         users: {
-//             users: '/users',
-//             user: '/users/{id}',
-//             register: '/users/register',
-//             login: '/users/login',
-//             me: '/users/me',
-//         }, 
+router.get('/',indexRoute);
 
+<<<<<<< HEAD
 //     })
 // }
 router.use('/images', imageRouter);
+=======
+>>>>>>> b3082e571089dfae7b810c30b78ae88fdbbfdea1
 router.get('/users', requireAdmin, catchErrors(listUsers));
-/*
-router.get('/users', requireAdmin, catchErrors(listUsers));
-router.get('/users/me', requireAuth, catchErrors(currentUser));
-router.patch('/users/me', requireAuth, catchErrors(updateCurrentUser));
 router.get('/users/:id', requireAdmin, catchErrors(listUser));
-router.patch('/users/:id', requireAdmin, catchErrors(updateUser));*/
+router.patch('/users/:id', requireAdmin, catchErrors(updateUserRoute));
+// users/register og users/login eru í registered.js
+router.get('/users/me', requireAuth, catchErrors(currentUserRoute));
+router.patch('/users/me', requireAuth, catchErrors(updateCurrentUser));
+
+// Routes fyrir tv
+
+router.get('/tv:id', requireAdmin, catchErrors(listUsers));
+router.get('/users/:id', requireAdmin, catchErrors(listUser));
+
+

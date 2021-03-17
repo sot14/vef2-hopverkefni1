@@ -93,8 +93,4 @@ export async function uploadImagesFromDisk(imageDir) {
   return images;
 }
 
-// router.get('/', uploadImagesFromDisk('./data/img'));
-// const images = uploadImagesFromDisk('./data/img');
-// console.log(images);
-
 
