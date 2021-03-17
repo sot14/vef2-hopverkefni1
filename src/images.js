@@ -1,10 +1,9 @@
 import util from 'util';
 import fs from 'fs';
 import path from 'path';
-import cloudinary from 'cloudinary';
+import { v2 as cloudinary } from 'cloudinary';
 import dotenv from 'dotenv';
 import express from 'express';
-import { requireEnv } from './utils.js'
 
 const readDirAsync = util.promisify(fs.readdir);
 const statAsync = util.promisify(fs.stat);
@@ -13,7 +12,6 @@ const uploadAsync = util.promisify(cloudinary.uploader.upload);
 
 export const router = express.Router();
 
-requireEnv(['CLOUDINARY_URL']);
 // Cloudinary er stillt sjálfkrafa því við höfum CLOUDINARY_URL í umhverfi
 
 // Geymum í minni niðurstöður úr því að lista allar myndir frá Cloudinary
@@ -25,23 +23,13 @@ const {
 
 dotenv.config();
 
-// cloudinary.config({
-//   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-//   api_key: process.env.CLOUDINARY_API_KEY,
-//   api_secret: process.env.CLOUDINARY_API_SECRET
-// });
-
 async function listImages() {
   if (cachedListImages) {
     return Promise.resolve(cachedListImages);
   }
-
-  console.log('after promise list images');
   // TODO hér þyrfti að taka við pageuðum niðurstöðum frá Cloudinary
   // en þar sem við erum með 20 myndir fáum við hámark per request og látum duga
   const res = await resourcesAsync({ max_results: 100 });
-
-  console.log('resourcesasync', res.resources);
   cachedListImages = res.resources;
   console.log(cachedListImages);
 
@@ -106,6 +94,7 @@ export async function uploadImagesFromDisk(imageDir) {
 }
 
 // router.get('/', uploadImagesFromDisk('./data/img'));
-uploadImagesFromDisk('./data/img')
+// const images = uploadImagesFromDisk('./data/img');
+// console.log(images);
 
 

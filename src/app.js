@@ -3,10 +3,11 @@ import { fileURLToPath } from 'url';
 import express from 'express';
 import dotenv from 'dotenv';
 
-import { router as indexRoute } from './index.js'
+import { router as indexRoute } from './index.js';
+import { router as imageRouter } from './images.js';
 import { app as auth } from '../authentication/registered.js';
 
-import { requireEnv } from './utils.js'
+import { requireEnv } from './utils.js';
 
 
 requireEnv(['DATABASE_URL', 'JWT_SECRET']);

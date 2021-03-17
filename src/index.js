@@ -1,6 +1,7 @@
 import express from 'express';
 import { catchErrors } from './utils.js';
-import { requireAuth, checkUserIsAdmin } from '../authentication/registered.js'
+import { requireAuth, checkUserIsAdmin } from '../authentication/registered.js';
+import {router as imageRouter} from './images.js';
 
 const requireAdmin = [
     requireAuth,
@@ -101,7 +102,7 @@ router.use('/', indexRoute);
 
 //     })
 // }
-router.use('/', indexRoute);
+router.use('/images', imageRouter);
 router.get('/users', requireAdmin, catchErrors(listUsers));
 /*
 router.get('/users', requireAdmin, catchErrors(listUsers));
