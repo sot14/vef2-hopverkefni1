@@ -15,25 +15,26 @@ dotenv.config();
 async function main () {
     console.info(`Set upp gagnagrunn á ${databaseUrl}`);
     console.info(`Set upp tengingu við Cloudinary á ${cloudinaryUrl}`);
-    let images = [];
-    try {
-        console.log(imageFolder);
-        images = await uploadImagesFromDisk(imageFolder);
-    } catch(e) {
-        console.error('Villa við að senda myndir', e);
-    }
+    // let images = [];
+    // try {
+    //     console.log(imageFolder);
+    //     images = await uploadImagesFromDisk(imageFolder);
+    // } catch(e) {
+    //     console.error('Villa við að senda myndir', e);
+    // }
 
-    console.log(images);
+    // console.log(images);
 
 
 
     const series = await readDataFromCSV('./data/series.csv');
     setTimeout(() => {
-        console.log(series.length);
+        console.log('setting up series', series.length);
+        let TVGenres = [];
         series.forEach((serie) => {
-            let cloudImage;
-            console.log(images.some(item => item.))
-        
+            // let cloudImage;
+            // console.log(images.some(item => item.))
+            
             let result = [];
             const queryString = `INSERT INTO series(id, name, aired, inProduction, tagline, thumbnail, description, language, network, url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10);`;
             
@@ -49,16 +50,42 @@ async function main () {
                 serie.network,
                 serie.homepage
             ];
-            result = query(queryString, values);
-            console.log(result);
-        });
-    }, 2000);
-    
+            try {
+                query(queryString, values);
+            } catch(e) {
+                console.error('villa við að inserta series', e);
+            }
 
-    const seasons = readDataFromCSV('./data/seasons.csv');
+            let currentGenres = serie.genres;
+            currentGenres = currentGenres.split(',');
+            currentGenres.forEach((genre) => {
+                if(!TVGenres.includes(genre)) {
+                    TVGenres.push(genre);
+                }
+            });
+           
+        });
+
+        TVGenres.forEach((genre) => {
+            const queryString = `INSERT INTO genres(name) VALUES ($1);`;
+            const values = [genre];
+
+            try {
+                query(queryString, values);
+            } catch(e) {
+                console.error('villa við að inserta genres', e);
+            }
+
+        });
+        
+    }, 2000);
+
+    const seasons = await readDataFromCSV('./data/seasons.csv');
+    
     setTimeout(() => {
+        console.log('inserting seasons', seasons.length);
         seasons.forEach((season) => {
-            const queryString = `INSERT INTO seasons(name, seasonNo, aired, description, seasonPoster, seasonName, FK_serie) VALUES ($1, $2, $3, $4, $5, $6, $7);`;
+            const queryString = `INSERT INTO season(name, seasonNo, aired, description, seasonPoster, serieName) VALUES ($1, $2, $3, $4, $5, $6);`;
             
             const values = [
                 season.name,
@@ -67,28 +94,36 @@ async function main () {
                 season.overview,
                 season.poster,
                 season.serie,
-                season.serieId
             ];
-            await query(queryString, values);
+            try {
+                query(queryString, values);
+            } catch (e) {
+                console.error('Villa við að inserta seasons', e);
+            }
         });
+        
+    }, 10000);
     
-    }, 2000);
-    
-    const episodes = readDataFromCSV('./data/episodes.csv');
+    const episodes = await readDataFromCSV('./data/episodes.csv');
     setTimeout(() => {
+        console.log('inserting episodes', episodes.length);
         episodes.forEach((episode) => {
-            const queryString = `INSERT INTO episodes(name, episodeNo, aired, description, season) VALUES ($1, $2, $3, $4, $5);`;
+            const queryString = `INSERT INTO episodes(name, episodeNo, aired, description) VALUES ($1, $2, $3, $4);`;
             
             const values = [
                 episode.name,
                 episode.number,
                 episode.airDate,
-                episode.overview,
-                episode.season,
+                episode.overview
+                // episode.season,
             ];
-            await query(queryString, values);
+            try {
+                query(queryString, values);
+            } catch (e) {
+                console.error('Villa við að inserta episodes', e);
+            }
         });
-    }, 2000);
+    }, 20000);
     
 
     // episodes::

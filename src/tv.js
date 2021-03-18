@@ -4,6 +4,7 @@ import express from 'express';
 export const router=express();
 
 export async function readDataFromCSV(file) {
+    console.log('reading from', file);
     const read = fs.createReadStream(file, {encoding: 'utf8'}).pipe(csvParser());
     let data = [];
     read.on('error', () => {
@@ -11,7 +12,6 @@ export async function readDataFromCSV(file) {
     });
 
     read.on('data', (chunk) => {
-        console.log(data);
         data.push(chunk);
     });
 
@@ -30,7 +30,7 @@ router.get('/', (req, res) => {
   });
 
 //export const series = readDataFromCSV('./data/series.csv');
-export const seasons = readDataFromCSV('./data/seasons.csv');
+//export const seasons = readDataFromCSV('./data/seasons.csv');
 //export const episodes = readDataFromCSV('./data/episodes.csv');
 
 
