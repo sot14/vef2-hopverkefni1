@@ -3,13 +3,15 @@ import { fileURLToPath } from 'url';
 import express from 'express';
 import dotenv from 'dotenv';
 
-import { router as indexRoute } from './index.js'
+import { router as indexRoute } from './index.js';
+import { router as imageRouter } from './images.js';
 import { app as auth } from '../authentication/registered.js';
 
 import { requireEnv } from './utils.js';
-dotenv.config();
+
 
 requireEnv(['DATABASE_URL', 'CLOUDINARY_URL', 'JWT_SECRET']);
+dotenv.config();
 
 const {
   PORT: port = 3000,
