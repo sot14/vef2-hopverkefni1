@@ -12,9 +12,8 @@ const resourcesAsync = util.promisify(cloudinary.api.resources);
 const uploadAsync = util.promisify(cloudinary.uploader.upload);
 
 export const router = express.Router();
-
+dotenv.config();
 // Cloudinary er stillt sjálfkrafa því við höfum CLOUDINARY_URL í umhverfi
-
 // Geymum í minni niðurstöður úr því að lista allar myndir frá Cloudinary
 let cachedListImages = null;
 
@@ -23,7 +22,11 @@ const {
   CLOUDINARY_URL: cloudinaryUrl,
 } = process.env;
 
-dotenv.config();
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 async function listImages() {
   if (cachedListImages) {
