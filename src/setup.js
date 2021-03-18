@@ -30,10 +30,9 @@ async function main () {
         series.forEach((serie) => {
         
             let result = [];
-            const queryString = `INSERT INTO series(id, name, aired, inProduction, tagline, thumbnail, description, language, network, url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11);`;
+            const queryString = `INSERT INTO series(name, aired, inProduction, tagline, thumbnail, description, language, network, url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9);`;
             
             const values = [
-                serie.id,
                 serie.name,
                 serie.airDate,
                 serie.inProduction,

@@ -19,7 +19,6 @@ export async function readDataFromCSV(file) {
     });
 
     read.on('end', () => {
-        console.log("data: ",data)
         return data;
     })
     return data;
