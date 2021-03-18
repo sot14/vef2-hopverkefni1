@@ -1,16 +1,15 @@
 import util from 'util';
 import fs from 'fs';
 import path from 'path';
-import cloudinary from 'cloudinary'
-const { v2 } = cloudinary;
+import {v2 as cloudinary } from 'cloudinary'
 
 import dotenv from 'dotenv';
 import express from 'express';
 
 const readDirAsync = util.promisify(fs.readdir);
 const statAsync = util.promisify(fs.stat);
-const resourcesAsync = util.promisify(v2.api.resources);
-const uploadAsync = util.promisify(v2.uploader.upload);
+const resourcesAsync = util.promisify(cloudinary.api.resources);
+const uploadAsync = util.promisify(cloudinary.uploader.upload);
 
 export const router = express.Router();
 
