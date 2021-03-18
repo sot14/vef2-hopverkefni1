@@ -7,7 +7,7 @@ import csvParser from 'csv-parser';
 const {
     DATABASE_URL: databaseUrl,
     CLOUDINARY_URL: cloudinaryUrl,
-    IMAGE_FOLDER: imageFolder = '../data/img',
+    IMAGE_FOLDER: imageFolder = './data/img',
   } = process.env;
 
 dotenv.config();
@@ -24,19 +24,18 @@ async function main () {
     }
 
     console.log(images);*/
-    const series = await readDataFromCSV('../data/series.csv');
+    const series = await readDataFromCSV('./data/series.csv');
     setTimeout(() => {
         console.log(series.length);
         series.forEach((serie) => {
         
             let result = [];
-            const queryString = `INSERT INTO series(id, name, aired, genres, inProduction, tagline, thumbnail, description, language, network, url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11);`;
+            const queryString = `INSERT INTO series(id, name, aired, inProduction, tagline, thumbnail, description, language, network, url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11);`;
             
             const values = [
                 serie.id,
                 serie.name,
                 serie.airDate,
-                serie.genres,
                 serie.inProduction,
                 serie.tagline,
                 serie.image, 
