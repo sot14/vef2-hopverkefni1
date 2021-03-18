@@ -14,25 +14,31 @@ dotenv.config();
 
 async function main () {
     console.info(`Set upp gagnagrunn á ${databaseUrl}`);
-    console.info(`Set uppp tengingu við Cloudinary á ${cloudinaryUrl}`);
-  /*  let images = [];
+    console.info(`Set upp tengingu við Cloudinary á ${cloudinaryUrl}`);
+    let images = [];
     try {
         console.log(imageFolder);
-        images = uploadImagesFromDisk(imageFolder);
+        images = await uploadImagesFromDisk(imageFolder);
     } catch(e) {
         console.error('Villa við að senda myndir', e);
     }
 
-    console.log(images);*/
+    console.log(images);
+
+
+
     const series = await readDataFromCSV('./data/series.csv');
     setTimeout(() => {
         console.log(series.length);
         series.forEach((serie) => {
+            let cloudImage;
+            console.log(images.some(item => item.))
         
             let result = [];
-            const queryString = `INSERT INTO series(name, aired, inProduction, tagline, thumbnail, description, language, network, url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9);`;
+            const queryString = `INSERT INTO series(id, name, aired, inProduction, tagline, thumbnail, description, language, network, url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10);`;
             
             const values = [
+                serie.id,
                 serie.name,
                 serie.airDate,
                 serie.inProduction,
@@ -46,28 +52,55 @@ async function main () {
             result = query(queryString, values);
             console.log(result);
         });
-    }, 3000);
-    
+    }, 2000);
     
 
-    // const seasons = readDataFromCSV('./data/seasons.csv');
-    // seasons.forEach((season) => {
-    //     const queryString = `INSERT INTO seasons(name, aired, inProduction, tagline, thumbnail, description, language, network, url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9);`);
-        
-    //     const values = [
-    //         serie.name,
-    //         serie.airDate,
-    //         serie.genres,
-    //         serie.inProduction,
-    //         serie.tagline,
-    //         serie.image, // TODO: rétt image
-    //         serie.description,
-    //         serie.language,
-    //         serie.network,
-    //         serie.homepage
-    //     ];
-    //     await query(queryString, values);
-    // })
+    const seasons = readDataFromCSV('./data/seasons.csv');
+    setTimeout(() => {
+        seasons.forEach((season) => {
+            const queryString = `INSERT INTO seasons(name, seasonNo, aired, description, seasonPoster, seasonName, FK_serie) VALUES ($1, $2, $3, $4, $5, $6, $7);`;
+            
+            const values = [
+                season.name,
+                season.number,
+                season.airDate,
+                season.overview,
+                season.poster,
+                season.serie,
+                season.serieId
+            ];
+            await query(queryString, values);
+        });
+    
+    }, 2000);
+    
+    const episodes = readDataFromCSV('./data/episodes.csv');
+    setTimeout(() => {
+        episodes.forEach((episode) => {
+            const queryString = `INSERT INTO episodes(name, episodeNo, aired, description, season) VALUES ($1, $2, $3, $4, $5);`;
+            
+            const values = [
+                episode.name,
+                episode.number,
+                episode.airDate,
+                episode.overview,
+                episode.season,
+            ];
+            await query(queryString, values);
+        });
+    }, 2000);
+    
+
+    // episodes::
+    // name: 'Apple',
+    // number: '8',
+    // airDate: '',
+    // overview: "During a robbery at the grocery mart Dr. Shaun Murphy is shopping at, his communication limitations puts lives at risk. Meanwhile, after Shaun's traumatic day, Dr. Aaron Glassman worries that he isn't doing enough to help Shaun.",
+    // season: '1',
+    // serie: 'The Good Doctor',
+    // serieId: '3'
+
+    // series::
     // id: '1',
     // name: 'WandaVision',
     // airDate: '2021-01-15',

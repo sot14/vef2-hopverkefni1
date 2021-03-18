@@ -23,7 +23,7 @@ const {
 } = process.env;
 
 cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_NAME,
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
@@ -32,11 +32,9 @@ async function listImages() {
   if (cachedListImages) {
     return Promise.resolve(cachedListImages);
   }
-  console.log('before resourcesasync');
   // TODO hér þyrfti að taka við pageuðum niðurstöðum frá Cloudinary
   // en þar sem við erum með 20 myndir fáum við hámark per request og látum duga
   const res = await resourcesAsync({ max_results: 100 });
-  console.log('after resourcesasync');
   cachedListImages = res.resources;
   console.log(cachedListImages);
 
@@ -50,7 +48,6 @@ function imageComparer(current) {
 
 async function getImageIfUploaded(imagePath) {
   const uploaded = await listImages();
-  console.log('back from listimages');
 
   const stat = await statAsync(imagePath);
 
@@ -69,7 +66,6 @@ async function uploadImageIfNotUploaded(imagePath) {
     console.log(`Mynd ${imagePath} þegar uploadað`);
     return alreadyUploaded.secure_url;
   }
-  console.log('gonna upload async');
   const uploaded = await uploadAsync(imagePath);
   console.log(`Mynd ${imagePath} uploadað`);
 
@@ -89,9 +85,7 @@ export async function uploadImagesFromDisk(imageDir) {
   for (let i = 0; i < filteredImages.length; i++) {
     const image = filteredImages[i];
     const imagePath = path.join(imageDir, image);
-    console.log('gonna upload');
     const uploaded = await uploadImageIfNotUploaded(imagePath); // eslint-disable-line
-    console.log('uploaded');
     images.push(uploaded);
   }
 
