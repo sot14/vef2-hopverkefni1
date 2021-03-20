@@ -12,11 +12,11 @@ const {
     DATABASE_URL: databaseUrl,
     CLOUDINARY_URL: cloudinaryUrl,
     IMAGE_FOLDER: imageFolder = './data/img',
-  } = process.env;
+} = process.env;
 
 dotenv.config();
 
-async function main () {
+async function main() {
     console.info(`Set upp gagnagrunn á ${databaseUrl}`);
     console.info(`Set upp tengingu við Cloudinary á ${cloudinaryUrl}`);
     // let images = [];
@@ -29,7 +29,7 @@ async function main () {
 
     // console.log(images);
 
-     // henda töflum
+    // henda töflum
     try {
         const createTable = await readFileAsync('../sql/drop.sql');
         await query(createTable.toString('utf8'));
@@ -52,16 +52,16 @@ async function main () {
     const series = await readDataFromCSV('../data/series.csv');
 
     const seasons = await readDataFromCSV('../data/seasons.csv');
-    
+
     const episodes = await readDataFromCSV('../data/episodes.csv');
-    
+
     // Kom ekki inn á réttum tíma þrátt fyrir await svo þurfti að nota settimeout
     setTimeout(async () => {
         await insertSeries(series); //inserts series and genres
         await insertSeasons(seasons);
         await insertEpisodes(episodes);
     }, 2000);
-    
+
 
     // episodes::
     // name: 'Apple',
@@ -70,7 +70,7 @@ async function main () {
     // overview: "During a robbery at the grocery mart Dr. Shaun Murphy is shopping at, his communication limitations puts lives at risk. Meanwhile, after Shaun's traumatic day, Dr. Aaron Glassman worries that he isn't doing enough to help Shaun.",
     // season: '1',
     // serie: 'The Good Doctor',
-    // serieId: '3'
+    // serie: '3'
 
     // series::
     // id: '1',
@@ -92,17 +92,17 @@ async function insertSeries(series) {
     series.forEach((serie) => {
         // let cloudImage;
         // console.log(images.some(item => item.))
-        
+
         let result = [];
         const queryString = 'INSERT INTO series(id, name, aired, inProduction, tagline, thumbnail, description, language, network, url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)';
-        
+
         const values = [
             serie.id,
             serie.name,
             serie.airDate,
             serie.inProduction,
             serie.tagline,
-            serie.image, 
+            serie.image,
             serie.description,
             serie.language,
             serie.network,
@@ -110,32 +110,32 @@ async function insertSeries(series) {
         ];
         try {
             query(queryString, values);
-        } catch(e) {
+        } catch (e) {
             console.error('villa við að inserta series', e);
         }
 
         let currentGenres = serie.genres;
         currentGenres = currentGenres.split(',');
         currentGenres.forEach((genre) => {
-            if(!TVGenres.includes(genre)) {
+            if (!TVGenres.includes(genre)) {
                 TVGenres.push(genre);
             }
         });
-        
-    });
 
+    });
+    
     TVGenres.forEach((genre) => {
         const queryString = `INSERT INTO genres(name) VALUES ($1);`;
         const values = [genre];
 
         try {
             query(queryString, values);
-        } catch(e) {
+        } catch (e) {
             console.error('villa við að inserta genres', e);
         }
 
     });
-        
+
 }
 
 async function insertSeasons(seasons) {
@@ -143,7 +143,7 @@ async function insertSeasons(seasons) {
 
     seasons.forEach((season) => {
         const queryString = `INSERT INTO season(name, seasonNo, aired, description, seasonPoster, serieName, FK_serie) VALUES ($1, $2, $3, $4, $5, $6, $7);`;
-        
+
         const values = [
             season.name,
             season.number,
@@ -165,7 +165,7 @@ async function insertEpisodes(episodes) {
     console.log('inserting episodes', episodes.length);
     episodes.forEach((episode) => {
         const queryString = `INSERT INTO episodes(name, episodeNo, aired, description) VALUES ($1, $2, $3, $4);`;
-        
+
         const values = [
             episode.name,
             episode.number,
@@ -182,4 +182,4 @@ async function insertEpisodes(episodes) {
 }
 main().catch((err) => {
     console.error(err);
-  });
+});
