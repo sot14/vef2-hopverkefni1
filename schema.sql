@@ -60,3 +60,5 @@ CREATE TABLE IF NOT EXISTS users_series(
   state varchar(64),
   rating INTEGER CHECK(rating < 6)
 );
+
+

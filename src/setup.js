@@ -13,8 +13,8 @@ const {
 dotenv.config();
 
 async function main () {
-    console.info(Set upp gagnagrunn á ${databaseUrl});
-    console.info(Set upp tengingu við Cloudinary á ${cloudinaryUrl});
+    console.info(`Set upp gagnagrunn á ${databaseUrl}`);
+    console.info(`Set upp tengingu við Cloudinary á ${cloudinaryUrl}`);
     // let images = [];
     // try {
     //     console.log(imageFolder);
@@ -30,10 +30,11 @@ async function main () {
     const series = await readDataFromCSV('./data/series.csv');
     setTimeout(() => {
         console.log('setting up series', series.length);
+        let TVGenres = [];
         series.forEach((serie) => {
             // let cloudImage;
             // console.log(images.some(item => item.))
-        
+            
             let result = [];
             const queryString = 'INSERT INTO series(id, name, aired, inProduction, tagline, thumbnail, description, language, network, url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)';
             
@@ -55,6 +56,26 @@ async function main () {
                 console.error('villa við að inserta series', e);
             }
 
+            let currentGenres = serie.genres;
+            currentGenres = currentGenres.split(',');
+            currentGenres.forEach((genre) => {
+                if(!TVGenres.includes(genre)) {
+                    TVGenres.push(genre);
+                }
+            });
+           
+        });
+
+        TVGenres.forEach((genre) => {
+            const queryString = `INSERT INTO genres(name) VALUES ($1);`;
+            const values = [genre];
+
+            try {
+                query(queryString, values);
+            } catch(e) {
+                console.error('villa við að inserta genres', e);
+            }
+
         });
         
     }, 2000);
@@ -64,7 +85,7 @@ async function main () {
     setTimeout(() => {
         console.log('inserting seasons', seasons.length);
         seasons.forEach((season) => {
-            const queryString = 'INSERT INTO season(name, seasonNo, aired, description, seasonPoster, serieName) VALUES ($1, $2, $3, $4, $5, $6)';
+            const queryString = `INSERT INTO season(name, seasonNo, aired, description, seasonPoster, serieName) VALUES ($1, $2, $3, $4, $5, $6);`;
             
             const values = [
                 season.name,
@@ -87,7 +108,7 @@ async function main () {
     setTimeout(() => {
         console.log('inserting episodes', episodes.length);
         episodes.forEach((episode) => {
-            const queryString = 'INSERT INTO episodes(name, episodeNo, aired, description) VALUES ($1, $2, $3, $4)';
+            const queryString = `INSERT INTO episodes(name, episodeNo, aired, description) VALUES ($1, $2, $3, $4);`;
             
             const values = [
                 episode.name,
