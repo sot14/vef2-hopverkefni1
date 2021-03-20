@@ -13,15 +13,15 @@ CREATE TABLE IF NOT EXISTS series(
 
 CREATE TABLE IF NOT EXISTS genres(  
     id serial primary key, 
-    name varchar(128) not null
+    name varchar(128) unique not null
 );
 
 -- tengitafla - series-genre
 CREATE TABLE series_genres (
   serie INTEGER NOT NULL,
-  genre INTEGER NOT NULL,
-  CONSTRAINT FK_seriesGenres_serie FOREIGN KEY (serie) REFERENCES series (id) ON DELETE CASCADE,
-  CONSTRAINT FK_seriesGenres_genre FOREIGN KEY (genre) REFERENCES genres (id) ON DELETE CASCADE
+  genre varchar(128) NOT NULL
+  --CONSTRAINT FK_seriesGenres_serie FOREIGN KEY (serie) REFERENCES series (id) ON DELETE CASCADE,
+  --CONSTRAINT FK_seriesGenres_genre FOREIGN KEY (genre) REFERENCES genres (name) ON DELETE CASCADE
 );
 
 
