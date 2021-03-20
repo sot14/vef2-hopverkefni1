@@ -18,6 +18,11 @@ import {
     updateCurrentUser,
 } from './users.js';
 
+import {
+    listSeries,
+    listEpisode,
+} from '../api/series.js'
+
 function indexRoute(req, res) {
     return res.json({
         tv: {
@@ -104,7 +109,7 @@ router.patch('/users/me', requireAuth, catchErrors(updateCurrentUser));
 
 // Routes fyrir tv
 
-router.get('/tv:id', requireAdmin, catchErrors());
-router.get('/users/:id', requireAdmin, catchErrors());
+router.get('/tv', catchErrors(listSeries));
+router.get('/tv/:id', catchErrors(listEpisode));
 
 
