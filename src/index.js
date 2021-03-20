@@ -3,6 +3,7 @@ import { catchErrors } from './utils.js';
 import { requireAuth, checkUserIsAdmin } from '../authentication/registered.js';
 import {router as imageRouter} from './images.js';
 import {listGenres, addGenre} from '../api/genres.js';
+import {listSeasons} from '../api/seasons.js';
 
 const requireAdmin = [
     requireAuth,
@@ -112,6 +113,8 @@ router.patch('/users/me', requireAuth, catchErrors(updateCurrentUser));
 
 router.get('/tv', catchErrors(listSeries));
 router.get('/tv/:id', catchErrors(listEpisode));
+
+router.get('/tv/:id/season', catchErrors(listSeasons));
 
 router.get('/genres', catchErrors(listGenres));
 router.post('/genres', requireAdmin, catchErrors(addGenre));

@@ -26,7 +26,6 @@ async function main () {
     // console.log(images);
 
 
-
     const series = await readDataFromCSV('./data/series.csv');
     setTimeout(() => {
         console.log('setting up series', series.length);
