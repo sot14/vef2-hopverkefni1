@@ -70,7 +70,7 @@ async function main() {
     // overview: "During a robbery at the grocery mart Dr. Shaun Murphy is shopping at, his communication limitations puts lives at risk. Meanwhile, after Shaun's traumatic day, Dr. Aaron Glassman worries that he isn't doing enough to help Shaun.",
     // season: '1',
     // serie: 'The Good Doctor',
-    // serie: '3'
+    // serieId: '3'
 
     // series::
     // id: '1',
@@ -114,16 +114,21 @@ async function insertSeries(series) {
             console.error('villa við að inserta series', e);
         }
 
+
+
         let currentGenres = serie.genres;
         currentGenres = currentGenres.split(',');
-        currentGenres.forEach((genre) => {
+        currentGenres.forEach(async (genre) => {
+
+
+            // find unique genres
             if (!TVGenres.includes(genre)) {
                 TVGenres.push(genre);
             }
         });
 
     });
-    
+
     TVGenres.forEach((genre) => {
         const queryString = `INSERT INTO genres(name) VALUES ($1);`;
         const values = [genre];
@@ -135,6 +140,39 @@ async function insertSeries(series) {
         }
 
     });
+
+    await series.forEach(async (serie) => {
+        console.log('inserting seriegenres');
+        const serieGenres = serie.genres.split(',');
+        console.log(serieGenres);
+        await serieGenres.forEach(async (serieGenre) => {
+            console.log(serieGenre);
+            let genres = [];
+            console.log('empty genres', genres);
+            try {
+                genres = await query('SELECT * FROM genres WHERE name = $1', [serieGenre]);
+                //genres = await query('SELECT * FROM genres;', []);
+            }
+            catch (e) {
+                console.error('error selecting genres', e);
+            }
+            console.log('selected genres', genres);
+            console.log(genres.id);
+            const genreQuery = 'INSERT INTO series_genres(serie, genre) VALUES($1, $2)';
+
+            const genreValues = [
+                serie.id,
+                genres.id
+            ]
+            try {
+                console.log('inserting into series_genres');
+                await query(genreQuery, genreValues);
+            } catch (e) {
+                console.error('villa við að inserta í series_genres', e);
+            }
+        });
+
+    })
 
 }
 

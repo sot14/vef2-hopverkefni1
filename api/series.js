@@ -125,7 +125,7 @@ export async function listSerie(req, res) {
   }
   let result = []
   result.push(serie)
-  //result.push(genre)
+  result.push(genre)
   console.log(seasonInfo)
   result.push(seasonInfo)
   return res.json(result);
@@ -159,7 +159,7 @@ async function findGenre(id) {
   }
   const genre = await query(
     `SELECT
-    name
+    *
     FROM
       genres
     WHERE id = $1`,
@@ -171,22 +171,18 @@ async function findGenre(id) {
   return genre.rows[0]
 }
 
-async function findSeasonInfo(id){
-  if (!isInt(id)) {
-    return null;
-  }
-  const seasonInfo = await query(
-    `SELECT
-    fk_serie
-    FROM
-      season
-    WHERE id = $1`,
-    [id],
-  );
-  if (seasonInfo.rows.length !== 1) {
-    return null;
-  }
-  return seasonInfo.rows[0]
+export async function findSeasonInfo(id) {
+  console.log("req params", id);
 
+  const seasons = await query(
+      `SELECT id, name, seasonno, aired, description, seasonposter
+          FROM season
+          WHERE FK_serie = $1
+          ORDER BY seasonNo`,
+      [id],
+  );
+  console.log(seasons);
+
+    return seasons.rows[0];
 }
 
