@@ -203,7 +203,7 @@ async function insertEpisodes(episodes) {
             // episode.season,
         ];
         try {
-            await query(queryString, values);
+            query(queryString, values);
         } catch (e) {
             console.error('Villa við að inserta episodes', e);
         }
