@@ -8,9 +8,10 @@ export async function listSeasons(req, res) {
     console.log(req.path);
 
     const seasons = await pagedQuery(
-        `SELECT *
-            FROM series
-            WHERE FK_serie = $1`,
+        `SELECT id, name, seasonno, aired, description, seasonposter
+            FROM season
+            WHERE FK_serie = $1
+            ORDER BY seasonNo`,
         [id],
         { offset, limit },
     );
