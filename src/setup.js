@@ -84,7 +84,7 @@ async function main () {
     setTimeout(() => {
         console.log('inserting seasons', seasons.length);
         seasons.forEach((season) => {
-            const queryString = `INSERT INTO season(id,name, seasonNo, aired, description, seasonPoster, serieName) VALUES ($1, $2, $3, $4, $5, $6, $7);`;
+            const queryString = `INSERT INTO season(name, seasonNo, aired, description, seasonPoster, serieName, FK_serie) VALUES ($1, $2, $3, $4, $5, $6, $7);`;
             
             const values = [
                 season.id,
@@ -94,6 +94,7 @@ async function main () {
                 season.overview,
                 season.poster,
                 season.serie,
+                season.serieId
             ];
             try {
                 query(queryString, values);
