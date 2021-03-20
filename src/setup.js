@@ -27,7 +27,7 @@ async function main () {
 
 
 
-    const series = await readDataFromCSV('./data/series.csv');
+    const series = await readDataFromCSV('../data/series.csv');
     setTimeout(() => {
         console.log('setting up series', series.length);
         let TVGenres = [];
@@ -35,7 +35,6 @@ async function main () {
             // let cloudImage;
             // console.log(images.some(item => item.))
             
-            let result = [];
             const queryString = 'INSERT INTO series(id, name, aired, inProduction, tagline, thumbnail, description, language, network, url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)';
             
             const values = [
@@ -80,14 +79,15 @@ async function main () {
         
     }, 2000);
 
-    const seasons = await readDataFromCSV('./data/seasons.csv');
+    const seasons = await readDataFromCSV('../data/seasons.csv');
     
     setTimeout(() => {
         console.log('inserting seasons', seasons.length);
         seasons.forEach((season) => {
-            const queryString = `INSERT INTO season(name, seasonNo, aired, description, seasonPoster, serieName) VALUES ($1, $2, $3, $4, $5, $6);`;
+            const queryString = `INSERT INTO season(id,name, seasonNo, aired, description, seasonPoster, serieName) VALUES ($1, $2, $3, $4, $5, $6, $7);`;
             
             const values = [
+                season.id,
                 season.name,
                 season.number,
                 season.airDate,
@@ -104,7 +104,7 @@ async function main () {
         
     }, 10000);
     
-    const episodes = await readDataFromCSV('./data/episodes.csv');
+    const episodes = await readDataFromCSV('../data/episodes.csv');
     setTimeout(() => {
         console.log('inserting episodes', episodes.length);
         episodes.forEach((episode) => {
