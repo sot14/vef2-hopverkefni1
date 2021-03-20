@@ -141,36 +141,26 @@ async function insertSeries(series) {
 
     });
 
-    // await series.forEach(async(serie) => {
-    //     console.log('inserting seriegenres');
-    //     const serieGenres = serie.genres.split(',');
-    //     console.log(serieGenres);
-    //     await serieGenres.forEach(async(serieGenre) => {
-    //         console.log(serieGenre);
-    //         let genres = [];
-    //         console.log('empty genres', genres);
-    //         try {
-    //             //genres = await query('SELECT * FROM genres WHERE name = $1', [serieGenre]);
-    //             genres = await query('SELECT * FROM genres;', []);
-    //         }
-    //         catch (e) {
-    //             console.error('error selecting genres', e);
-    //         }
-    //         console.log('selected genres', genres);
-    //         console.log(genres.id);
-    //         const genreQuery = 'INSERT INTO series_genres(serie, genre) VALUES($1, $2)';
+    await series.forEach(async(serie) => {
+        console.log('inserting seriegenres');
+        const serieGenres = serie.genres.split(',');
+        console.log(serieGenres);
+        await serieGenres.forEach(async(serieGenre) => {
+            console.log(serieGenre);
+            
+            const genreQuery = 'INSERT INTO series_genres(serie, genre) VALUES($1, $2)';
 
-    //         const genreValues = [
-    //             serie.id,
-    //             genres.id
-    //         ]
-    //         try {
-    //             console.log('inserting into series_genres');
-    //             await query(genreQuery, genreValues);
-    //         } catch(e) {
-    //             console.error('villa við að inserta í series_genres', e);
-    //         }
-    //     });
+            const genreValues = [
+                serie.id,
+                serieGenre
+            ]
+            try {
+                console.log('inserting into series_genres');
+                await query(genreQuery, genreValues);
+            } catch(e) {
+                console.error('villa við að inserta í series_genres', e);
+            }
+        });
         
         
     })
@@ -213,7 +203,7 @@ async function insertEpisodes(episodes) {
             // episode.season,
         ];
         try {
-            query(queryString, values);
+            await query(queryString, values);
         } catch (e) {
             console.error('Villa við að inserta episodes', e);
         }
