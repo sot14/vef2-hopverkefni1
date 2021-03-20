@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS genres(
 CREATE TABLE series_genres (
   serie INTEGER NOT NULL,
   genre INTEGER NOT NULL,
-  CONSTRAINT FK_seriesGenres_serie FOREIGN KEY (serie ) REFERENCES series (id) ON DELETE CASCADE,
+  CONSTRAINT FK_seriesGenres_serie FOREIGN KEY (serie) REFERENCES series (id) ON DELETE CASCADE,
   CONSTRAINT FK_seriesGenres_genre FOREIGN KEY (genre) REFERENCES genres (id) ON DELETE CASCADE
 );
 

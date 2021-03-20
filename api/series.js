@@ -177,7 +177,7 @@ async function findSeasonInfo(id){
   }
   const seasonInfo = await query(
     `SELECT
-    *
+    fk_serie
     FROM
       season
     WHERE id = $1`,
