@@ -37,7 +37,6 @@ const tokenLifetime = toPositiveNumberOrDefault(
   defaultTokenLifetime,
 );
 
-console.log("mjamja", process.env.JWT_SECRET)
 
 if (!jwtSecret) {
   console.error('Vantar .env gildi');

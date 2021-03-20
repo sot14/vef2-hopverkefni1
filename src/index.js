@@ -2,7 +2,7 @@ import express from 'express';
 import { catchErrors } from './utils.js';
 import { requireAuth, checkUserIsAdmin } from '../authentication/registered.js';
 import {router as imageRouter} from './images.js';
-import {listGenres} from '../api/genres.js';
+import {listGenres, addGenre} from '../api/genres.js';
 
 const requireAdmin = [
     requireAuth,
@@ -109,4 +109,5 @@ router.get('/tv:id', requireAdmin, catchErrors());
 router.get('/users/:id', requireAdmin, catchErrors());
 
 router.get('/genres', catchErrors(listGenres));
+router.post('/genres', requireAdmin, catchErrors(addGenre));
 
