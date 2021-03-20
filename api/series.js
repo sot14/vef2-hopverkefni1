@@ -113,13 +113,22 @@ export async function createSeries(req, res, next) {
 }
 
 // Birtir upplýsingar um stakan sjónvarpsþátt
-export async function listEpisode(req, res) {
+export async function listSerie(req, res) {
   const { id } = req.params;
   const episode = await findEpisode(id);
 
   if (!episode) {
-    return res.status(404).json({ error: 'Episode not found' });
+    return res.status(404).json({ error: 'Serie not found' });
   }
+    
+  const genres = await findSerieGenresById(series.id);
+  series.genres = genres;
+
+  const serieSeasons = await query(
+    'SELECT * FROM seasons WHERE serie = $1 ORDER BY number ASC',
+    [id],
+  )
+  series.seasons = serieSeasons.rows;
 
   return res.json(episode);
 }

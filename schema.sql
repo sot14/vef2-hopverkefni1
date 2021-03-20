@@ -26,7 +26,7 @@ CREATE TABLE series_genres (
 
 
 CREATE TABLE IF NOT EXISTS season(
-    id serial primary key,
+    id serial primary key,sna
     name varchar(128) not null,
     seasonNo integer not null check ( seasonNo > 0),
     aired date,
