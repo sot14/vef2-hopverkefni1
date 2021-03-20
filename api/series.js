@@ -113,19 +113,22 @@ export async function createSeries(req, res, next) {
 }
 
 // Birtir upplýsingar um stakan sjónvarpsþátt
-export async function listEpisode(req, res) {
+export async function listSerie(req, res) {
   const { id } = req.params;
-  const episode = await findEpisode(id);
+  const serie = await findSerie(id);
+  const genre = await findGenre(id);
 
-  if (!episode) {
-    return res.status(404).json({ error: 'Episode not found' });
+  if (!serie) {
+    return res.status(404).json({ error: 'Serie not found' });
   }
-
-  return res.json(episode);
+  let result =[]
+  result.push(serie)
+  result.push(genre)
+  return res.json(result);
 }
 
-// Finnur sjónvarpsþátt út frá id 
-export async function findEpisode(id) {
+// Finnur sjónvarpsþáttaseríu út frá id 
+export async function findSerie(id) {
   if (!isInt(id)) {
     return null;
   }
@@ -143,5 +146,54 @@ export async function findEpisode(id) {
     return null;
   }
 
-  return episode.rows[0];
+  return episode.rows[0]
+}
+
+async function findGenre(id){
+  if (!isInt(id)) {
+    return null;
+  }
+  const genre = await query(
+    `SELECT
+    name
+    FROM
+      genres
+    WHERE id = $1`,
+    [id],
+  );
+  if (genre.rows.length !== 1) {
+    return null;
+  }
+  return genre.rows[0]
+}
+
+
+
+async function findSerieGenresById(serieID) {
+  if (!isInt(serieID)) {
+    return null;
+  }
+
+  const serieGenres = await query(
+    `SELECT
+      genre
+    FROM
+      serie_genre
+    WHERE serie = $1
+  `,
+    [serieID],
+  );
+
+  const genres = await query('SELECT * FROM genres');
+  const values = [];
+
+  serieGenres.rows.forEach((id) => {
+    genres.rows.forEach((row) => {
+      if (row.id === id.genre) {
+        values.push(row);
+      }
+    });
+  });
+
+  return values;
 }

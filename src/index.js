@@ -22,7 +22,7 @@ import {
 
 import {
     listSeries,
-    listEpisode,
+    listSerie,
 } from '../api/series.js'
 
 function indexRoute(req, res) {
@@ -112,7 +112,7 @@ router.patch('/users/me', requireAuth, catchErrors(updateCurrentUser));
 // Routes fyrir tv
 
 router.get('/tv', catchErrors(listSeries));
-router.get('/tv/:id', catchErrors(listEpisode));
+router.get('/tv/:id', catchErrors(listSerie));
 
 router.get('/tv/:id/season', catchErrors(listSeasons));
 router.get('/tv/:id/season/:id', catchErrors(listSeason));

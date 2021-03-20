@@ -51,7 +51,7 @@ async function main () {
 
     const series = await readDataFromCSV('./data/series.csv');
 
-    const seasons = await readDataFromCSV('./data/seasons.csv');
+    const seasons = await readDataFromCSV('../data/seasons.csv');
     
     const episodes = await readDataFromCSV('./data/episodes.csv');
     
