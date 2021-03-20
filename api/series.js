@@ -2,6 +2,7 @@ import xss from 'xss';
 import bcrypt from 'bcrypt';
 import { addPageMetadata } from '../src/utils.js';
 import { query, pagedQuery } from '../src/db.js';
+//import { listSeason } from './seasons.js'
 
 import {
   isInt,
@@ -117,13 +118,16 @@ export async function listSerie(req, res) {
   const { id } = req.params;
   const serie = await findSerie(id);
   const genre = await findGenre(id);
+  const seasonInfo = await findSeasonInfo(id)
 
   if (!serie) {
     return res.status(404).json({ error: 'Serie not found' });
   }
-  let result =[]
+  let result = []
   result.push(serie)
-  result.push(genre)
+  //result.push(genre)
+  console.log(seasonInfo)
+  result.push(seasonInfo)
   return res.json(result);
 }
 
@@ -149,7 +153,7 @@ export async function findSerie(id) {
   return episode.rows[0]
 }
 
-async function findGenre(id){
+async function findGenre(id) {
   if (!isInt(id)) {
     return null;
   }
@@ -167,33 +171,22 @@ async function findGenre(id){
   return genre.rows[0]
 }
 
-
-
-async function findSerieGenresById(serieID) {
-  if (!isInt(serieID)) {
+async function findSeasonInfo(id){
+  if (!isInt(id)) {
     return null;
   }
-
-  const serieGenres = await query(
+  const seasonInfo = await query(
     `SELECT
-      genre
+    *
     FROM
-      serie_genre
-    WHERE serie = $1
-  `,
-    [serieID],
+      season
+    WHERE id = $1`,
+    [id],
   );
+  if (seasonInfo.rows.length !== 1) {
+    return null;
+  }
+  return seasonInfo.rows[0]
 
-  const genres = await query('SELECT * FROM genres');
-  const values = [];
-
-  serieGenres.rows.forEach((id) => {
-    genres.rows.forEach((row) => {
-      if (row.id === id.genre) {
-        values.push(row);
-      }
-    });
-  });
-
-  return values;
 }
+

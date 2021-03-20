@@ -20,8 +20,8 @@ CREATE TABLE IF NOT EXISTS genres(
 CREATE TABLE series_genres (
   serie INTEGER NOT NULL,
   genre INTEGER NOT NULL,
-  CONSTRAINT FK_seriesGenres_serie FOREIGN KEY (id) REFERENCES series (id) ON DELETE CASCADE,
-  CONSTRAINT FK_seriesGenres_genre FOREIGN KEY (id) REFERENCES genres (id) ON DELETE CASCADE
+  CONSTRAINT FK_seriesGenres_serie FOREIGN KEY (serie ) REFERENCES series (id) ON DELETE CASCADE,
+  CONSTRAINT FK_seriesGenres_genre FOREIGN KEY (genre) REFERENCES genres (id) ON DELETE CASCADE
 );
 
 
@@ -43,6 +43,7 @@ CREATE TABLE IF NOT EXISTS episodes(
      episodeNo integer not null check ( episodeNo > 0),
      aired date,
      description varchar (1024),
+     FK_Season serial,
      CONSTRAINT FK_season FOREIGN KEY (id) REFERENCES season (id)
 );
 
