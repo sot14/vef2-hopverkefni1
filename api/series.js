@@ -126,7 +126,7 @@ export async function listSerie(req, res) {
   let result = []
   result.push(serie)
   result.push(genre)
-  console.log(seasonInfo)
+  console.log("seasonIngogogofo: ",seasonInfo)
   result.push(seasonInfo)
   return res.json(result);
 }
@@ -161,28 +161,26 @@ async function findGenre(id) {
     `SELECT
     *
     FROM
-      genres
-    WHERE id = $1`,
+      series_genres
+    WHERE serie = $1`,
     [id],
   );
-  if (genre.rows.length !== 1) {
-    return null;
-  }
-  return genre.rows[0]
+  return genre.rows
 }
 
 export async function findSeasonInfo(id) {
-  console.log("req params", id);
+  if (!isInt(id)) {
+    return null;
+  }
 
-  const seasons = await query(
-      `SELECT id, name, seasonno, aired, description, seasonposter
-          FROM season
-          WHERE FK_serie = $1
-          ORDER BY seasonNo`,
-      [id],
+  const season = await query(
+    `SELECT
+    *
+    FROM
+      season
+    WHERE fk_serie = $1`,
+    [id],
   );
-  console.log(seasons);
-
-    return seasons.rows[0];
+  return season.rows[0];
 }
 
