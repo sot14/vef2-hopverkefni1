@@ -168,12 +168,12 @@ export async function createSeason(req, res, next) {
         RETURNING *`;
 
   const values = [
-    xss(serie.name),
-    xss(serie.seasonNo),
-    xss(serie.aired),
-    xss(serie.overview),
-    xss(serie.seasonPoster),
-    xss(serie.serieName),
+    xss(season.name),
+    xss(season.seasonNo),
+    xss(season.aired),
+    xss(season.overview),
+    xss(season.seasonPoster),
+    xss(season.serieName),
   ];
   const result = await query(q, values);
   return res.json(result.rows[0]);
@@ -189,4 +189,28 @@ export async function deleteSeason(req, res) {
   const q = 'DELETE FROM season WHERE seasonNo = $1'
   await query(q, [seasonNumber]);
   return res.status(204).json({});
+}
+export async function rateSeason(req, res) {
+  //const { rating } = 
+  let validation = [];
+
+  if (!isInt(rating)) {
+    validation.push({
+      field: 'rate',
+      error: 'Rating must be an integer,one of 0, 1, 2, 3, 4, 5',
+    });
+    return validation
+  }
+  const userSeries = 'SELECT * FROM user_series WHERE FK_serie=$1 AND FK_user=$2'
+  const q = `
+  INSERT INTO user_series(rating) 
+  VALUES ($1)
+        RETURNING *`;
+
+  const values = [
+    xss(userSeries.rating),
+  ];
+  const result = await query(q, values);
+  return res.json(result.rows[0]);
+
 }
