@@ -179,14 +179,14 @@ export async function createSeason(req, res, next) {
   return res.json(result.rows[0]);
 }
 export async function deleteSeason(req, res) {
-  const { serieNumber, seasonNumber } = req.params;
+  const { seasonNumber } = req.params;
 
-  const season = await findSeasonInfo(seasonNumber);
+  const season = await await query(`SELECT * FROM episodes WHERE seasonNo=$1`, [seasonNumber]);
 
   if (!season) {
     return res.status(404).json({ error: 'Season not found' });
   }
-  const q = 'DELETE FROM season WHERE serieName = $1 AND FK_serie=$2'
-  await query(q, [serieNumber,seasonNumber]);
+  const q = 'DELETE FROM season WHERE seasonNo = $1'
+  await query(q, [seasonNumber]);
   return res.status(204).json({});
 }
