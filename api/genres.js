@@ -55,6 +55,3 @@ async function validateGenre(name) {
       return [];
 }
 
-async function findGenreByName(name) {
-
-}

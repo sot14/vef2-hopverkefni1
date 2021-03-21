@@ -37,7 +37,6 @@ async function listImages() {
   // en þar sem við erum með 20 myndir fáum við hámark per request og látum duga
   const res = await resourcesAsync({ max_results: 100 });
   cachedListImages = res.resources;
-  console.log(cachedListImages);
 
   return res.resources;
 }
@@ -59,8 +58,7 @@ async function getImageIfUploaded(imagePath) {
   return found;
 }
 
-async function uploadImageIfNotUploaded(imagePath) {
-  console.log('check if uploaded');
+export async function uploadImageIfNotUploaded(imagePath) {
   const alreadyUploaded = await getImageIfUploaded(imagePath);
 
   if (alreadyUploaded) {

@@ -125,7 +125,7 @@ router.use('/images', imageRouter);
 router.get('/users', requireAdmin, catchErrors(listUsers));
 router.get('/users/:id', requireAdmin, catchErrors(listUser));
 router.patch('/users/:id', requireAdmin, catchErrors(updateUserRoute));
-// users/register og users/login eru í registered.js
+/* users/register og users/login eru í registered.js */
 router.get('/users/me', requireAuth, catchErrors(currentUserRoute));
 router.patch('/users/me', requireAuth, catchErrors(updateCurrentUser));
 

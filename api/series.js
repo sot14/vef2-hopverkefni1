@@ -1,17 +1,14 @@
 import xss from 'xss';
 import bcrypt from 'bcrypt';
-import { addPageMetadata, catchErrors } from '../src/utils.js';
+import { addPageMetadata } from '../src/utils.js';
 import { query, pagedQuery, conditionalUpdate } from '../src/db.js';
-import express from 'express';
 import { requireAuth, checkUserIsAdmin } from '../authentication/registered.js';
-import { listSeason, listSeasons } from './seasons.js';
+import { uploadImageIfNotUploaded } from '../src/images.js';
 
 const requireAdmin = [
   requireAuth,
   checkUserIsAdmin,
 ];
-
-export const router = express.Router();
 
 import {
   isInt,
@@ -20,6 +17,7 @@ import {
   isString,
   isBoolean,
   isDate,
+  validateImageMimetype
 } from '../authentication/validations.js'
 
 // Birtir upplýsingar um allar sjónvarpsþáttaseríur
@@ -126,13 +124,52 @@ async function validateSerie({ name, aired, inProduction, tagline, thumbnail, de
 export async function createSeries(req, res, next) {
 
   const { name, aired, inProduction, tagline, thumbnail, description, language, network, url } = req.body;
+
+  const { file: { path, mimetype } = {} } = req;
+  const hasImage = Boolean(path && mimetype);
+
   const serie = { name, aired, inProduction, tagline, thumbnail, description, language, network, url };
   const validations = await validateSerie(serie);
+
+  if (hasImage) {
+    if (!validateImageMimetype(mimetype)) {
+      validations.push({
+        field: 'image',
+        error: `Mimetype ${mimetype} is not legal. ` +
+               `Only ${MIMETYPES.join(', ')} are accepted`,
+      });
+    }
+  }
 
   if (validations.length > 0) {
     return res.status(400).json({
       errors: validations,
     });
+  }
+
+  if (hasImage) {
+    let upload = null;
+    try {
+      upload = await uploadImageIfNotUploaded(path);
+    } catch (error) {
+      // Skilum áfram villu frá Cloudinary, ef einhver
+      if (error.http_code && error.http_code === 400) {
+        return res.status(400).json({ errors: [{
+          field: 'image',
+          error: error.message,
+        }] });
+      }
+
+      console.error('Unable to upload file to cloudinary');
+      return next(error);
+    }
+
+    if (upload && upload.secure_url) {
+      serie.thumbnail = upload.secure_url;
+    } else {
+      // Einhverja hluta vegna er ekkert `secure_url`?
+      return next(new Error('Cloudinary upload missing secure_url'));
+    }
   }
 
   const maxId = await query(`SELECT MAX(id) FROM series`, []);
@@ -178,48 +215,50 @@ export async function updateSeries(req, res) {
   const { name, aired, inProduction, tagline, thumbnail, description, language, network, url } = req.body;
   const serie = { name, aired, inProduction, tagline, thumbnail, description, language, network, url };
 
+  const { file: { path, mimetype } = {} } = req;
+  const hasImage = Boolean(path && mimetype);
+  
   const validations = await validateSerie(serie, true, id);
 
-  // ---- FYRIR MYNDIR------
-  // if (hasImage) {
-  //   if (!validateImageMimetype(mimetype)) {
-  //     validations.push({
-  //       field: 'image',
-  //       error: `Mimetype ${mimetype} is not legal. ` +
-  //         `Only ${MIMETYPES.join(', ')} are accepted`,
-  //     });
-  //   }
-  // }
+  if (hasImage) {
+    if (!validateImageMimetype(mimetype)) {
+      validations.push({
+        field: 'image',
+        error: `Mimetype ${mimetype} is not legal. ` +
+          `Only ${MIMETYPES.join(', ')} are accepted`,
+      });
+    }
+  }
 
   if (!validations.length > 0) {
     return res.status(404).json({ error: 'Serie not found' });
   }
-    // ---- FYRIR MYNDIR ------
-    // Aðeins ef allt er löglegt uploadum við mynd
-    // if (hasImage) {
-    //   let upload = null;
-    //   try {
-    //     upload = await cloudinary.uploader.upload(path);
-    //   } catch (error) {
-    //     // Skilum áfram villu frá Cloudinary, ef einhver
-    //     if (error.http_code && error.http_code === 400) {
-    //       return res.status(400).json({ errors: [{
-    //         field: 'image',
-    //         error: error.message,
-    //       }] });
-    //     }
-  
-    //     console.error('Unable to upload file to cloudinary');
-    //     return next(error);
-    //   }
-  
-    //   if (upload && upload.secure_url) {
-    //     product.image = upload.secure_url;
-    //   } else {
-    //     // Einhverja hluta vegna er ekkert `secure_url`?
-    //     return next(new Error('Cloudinary upload missing secure_url'));
-    //   }
-    // }
+    
+  if (hasImage) {
+    let upload = null;
+    try {
+      upload = await uploadImageIfNotUploaded(path);
+    } catch (error) {
+      // Skilum áfram villu frá Cloudinary, ef einhver
+      if (error.http_code && error.http_code === 400) {
+        return res.status(400).json({ errors: [{
+          field: 'image',
+          error: error.message,
+        }] });
+      }
+
+      console.error('Unable to upload file to cloudinary');
+      return next(error);
+    }
+
+    if (upload && upload.secure_url) {
+      serie.thumbnail = upload.secure_url;
+    } else {
+      // Einhverja hluta vegna er ekkert `secure_url`?
+      return next(new Error('Cloudinary upload missing secure_url'));
+    }
+  }
+
     const fields = [
       isString(serie.name) ? 'name' : null,
       isString(serie.aired) ? 'price' : null,
@@ -321,13 +360,3 @@ export async function findSeasonInfo(id) {
   );
   return season.rows;
 }
-
-router.get('/', catchErrors(listSeries));
-
-router.get('/:id', catchErrors(listSerie));
-router.get('/:id/season', catchErrors(listSeasons));
-router.delete('/:id', requireAdmin, catchErrors(deleteSeries));
-router.patch('/:id', requireAdmin, catchErrors(updateSeries));
-
-router.get('/:serieNumber/season/:seasonNumber', catchErrors(listSeason));
-router.post('/', requireAdmin, catchErrors(createSeries));

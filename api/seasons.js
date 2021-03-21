@@ -1,5 +1,6 @@
 import xss from 'xss';
 import { pagedQuery, query } from '../src/db.js';
+import { uploadImageIfNotUploaded } from '../src/images.js';
 import { addPageMetadata, catchErrors } from '../src/utils.js';
 import express from 'express';
 import { isInt, isNotEmptyString, toPositiveNumberOrDefault, isDate, isString } from '../authentication/validations.js';
@@ -157,14 +158,54 @@ export async function createSeason(req, res, next) {
 
   const { name, seasonNo, aired, overview, seasonPoster } = req.body;
   const serieName = serieItem.name;
+
+  const { file: { path, mimetype } = {} } = req;
+  const hasImage = Boolean(path && mimetype);
+
   const season = { name, seasonNo, aired, overview, seasonPoster, serieName, serieNumber };
   const validations = await validateSeason(season);
+
+  if (hasImage) {
+    if (!validateImageMimetype(mimetype)) {
+      validations.push({
+        field: 'image',
+        error: `Mimetype ${mimetype} is not legal. ` +
+          `Only ${MIMETYPES.join(', ')} are accepted`,
+      });
+    }
+  }
 
   if (validations.length > 0) {
     return res.status(400).json({
       errors: validations,
     });
   }
+
+  if (hasImage) {
+    let upload = null;
+    try {
+      upload = await uploadImageIfNotUploaded(path);
+    } catch (error) {
+      // Skilum áfram villu frá Cloudinary, ef einhver
+      if (error.http_code && error.http_code === 400) {
+        return res.status(400).json({ errors: [{
+          field: 'image',
+          error: error.message,
+        }] });
+      }
+
+      console.error('Unable to upload file to cloudinary');
+      return next(error);
+    }
+
+    if (upload && upload.secure_url) {
+      season.seasonPoster = upload.secure_url;
+    } else {
+      // Einhverja hluta vegna er ekkert `secure_url`?
+      return next(new Error('Cloudinary upload missing secure_url'));
+    }
+  }
+
 
   const q = `
   INSERT INTO season(name, seasonNo, aired, overview, seasonPoster, serieName, FK_serie) 
