@@ -16,7 +16,7 @@ export async function listGenres(req, res) {
     return res.json(genres);
 }
 
-export async function addGenre(req, res) {
+export async function createGenre(req, res) {
     const { name } = req.body;
     const validations = await validateGenre(name);
     if (validations.length > 0) {
@@ -27,7 +27,7 @@ export async function addGenre(req, res) {
 
     let result;
     try {
-        result = await query(`INSERT INTO genre(name) VALUES($1) RETURNING id, name;`, [name]);
+        result = await query(`INSERT INTO genres(name) VALUES($1) RETURNING *;`, [name]);
     } catch (e) {
         console.error('Villa við að inserta genre');
     }

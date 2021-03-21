@@ -24,12 +24,14 @@ import {
     listSerie,
     createSeries,
     updateSeries,
-    deleteSeries
+    deleteSeries,
+    rateSerie,
+    updateRating
 } from '../api/series.js'
 
 import {
     listGenres, 
-    addGenre
+    createGenre
 } from '../api/genres.js';
 import {
     listSeasons, 
@@ -122,7 +124,6 @@ router.get('/',indexRoute);
 router.use('/images', imageRouter);
 
 // Routes fyrir users
-
 router.get('/users', requireAdmin, catchErrors(listUsers));
 router.get('/users/:id', requireAdmin, catchErrors(listUser));
 router.patch('/users/:id', requireAdmin, catchErrors(updateUserRoute));
@@ -134,12 +135,14 @@ router.patch('/users/me', requireAuth, catchErrors(updateCurrentUser));
 router.get('/tv', catchErrors(listSeries));
 router.post('/tv', requireAdmin, catchErrors(createSeries));
 router.get('/tv/:id', catchErrors(listSerie));
-router.delete('tv/:id', requireAdmin, catchErrors(deleteSeries));
-router.patch('tv/:id', requireAdmin, catchErrors(updateSeries));
+router.delete('/tv/:id', requireAdmin, catchErrors(deleteSeries));
+router.patch('/tv/:id', requireAdmin, catchErrors(updateSeries));
+router.get('/tv/:id/rate',requireAuth,catchErrors(rateSerie));
+router.patch('/tv/:id/rate',requireAuth,catchErrors(updateRating));
 
 // Routes fyrir seasons
 router.get('/tv/:id/season', catchErrors(listSeasons));
-router.post('/tv:id/season',requireAdmin, catchErrors(createSeason));
+router.post('/tv/:serieNumber/season', requireAdmin, catchErrors(createSeason));
 router.get('/tv/:serieNumber/season/:seasonNumber', catchErrors(listSeason));
 router.delete('/tv/:serieNumber/season/:seasonNumber', catchErrors(deleteSeason));
 
@@ -150,5 +153,5 @@ router.delete('/tv/:serieNumber/season/:seasonNumber/episode/:episodeNumber', ca
 
 // Routes fyrir genres
 router.get('/genres', catchErrors(listGenres));
-router.post('/genres', requireAdmin, catchErrors(addGenre));
+router.post('/genres', requireAdmin, catchErrors(createGenre));
 

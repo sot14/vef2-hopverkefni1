@@ -135,12 +135,16 @@ export async function createSeries(req, res, next) {
     });
   }
 
+  const maxId = await query(`SELECT MAX(id) FROM series`, []);
+  const id = maxId.rows[0].max + 1;
+  console.log(id);
   const q = `
-  INSERT INTO series(name, aired, inProduction, tagline, thumbnail, description, language, network, url) 
-  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+  INSERT INTO series(id, name, aired, inProduction, tagline, thumbnail, description, language, network, url) 
+  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
         RETURNING *`;
 
   const values = [
+    xss(id),
     xss(serie.name),
     xss(serie.aired),
     xss(serie.inProduction),
@@ -151,6 +155,7 @@ export async function createSeries(req, res, next) {
     xss(serie.network),
     xss(serie.url),
   ];
+  console.log('inserting serie');
   const result = await query(q, values);
   return res.json(result.rows[0]);
 }
@@ -189,71 +194,78 @@ export async function updateSeries(req, res) {
   if (!validations.length > 0) {
     return res.status(404).json({ error: 'Serie not found' });
   }
-    // ---- FYRIR MYNDIR ------
-    // Aðeins ef allt er löglegt uploadum við mynd
-    // if (hasImage) {
-    //   let upload = null;
-    //   try {
-    //     upload = await cloudinary.uploader.upload(path);
-    //   } catch (error) {
-    //     // Skilum áfram villu frá Cloudinary, ef einhver
-    //     if (error.http_code && error.http_code === 400) {
-    //       return res.status(400).json({ errors: [{
-    //         field: 'image',
-    //         error: error.message,
-    //       }] });
-    //     }
-  
-    //     console.error('Unable to upload file to cloudinary');
-    //     return next(error);
-    //   }
-  
-    //   if (upload && upload.secure_url) {
-    //     product.image = upload.secure_url;
-    //   } else {
-    //     // Einhverja hluta vegna er ekkert `secure_url`?
-    //     return next(new Error('Cloudinary upload missing secure_url'));
-    //   }
-    // }
-    const fields = [
-      isString(serie.name) ? 'name' : null,
-      isString(serie.aired) ? 'price' : null,
-      isString(serie.inProduction) ? 'inProduction' : null,
-      isString(serie.tagline) ? 'tagline' : null,
-      isString(serie.thumbnail) ? 'thumbnail' : null,
-      isString(serie.description) ? 'description' : null,
-      isString(serie.language) ? 'language' : null,
-      isString(serie.network) ? 'network' : null,
-      isString(serie.url) ? 'url' : null,
-    ];
-    
-    const values = [
-      isString(serie.name) ? xss(serie.title) : null,
-      isString(serie.aired) ? xss(serie.price) : null,
-      isString(serie.inProduction) ? xss(serie.inProduction) : null,
-      isString(serie.tagline) ? xss(serie.tagline) : null,
-      isString(serie.thumbnail) ? xss(serie.thumbnail) : null,
-      isString(serie.description) ? xss(serie.description) : null,
-      isString(serie.language) ? xss(serie.language) : null,
-      isString(serie.network) ? xss(serie.network) : null,
-      isString(serie.url) ? xss(serie.url) : null,
-    ];
-  
-    if (!fields.filter(Boolean).length === 0) {
-      return res.status(400).json({ error: 'Nothing to update' });
-    }
-  
-    fields.push('updated');
-    values.push(new Date());
-  
-    const result = await conditionalUpdate('series', id, fields, values);
-    return res.status(201).json(result.rows[0]);
-}
+  // ---- FYRIR MYNDIR ------
+  // Aðeins ef allt er löglegt uploadum við mynd
+  // if (hasImage) {
+  //   let upload = null;
+  //   try {
+  //     upload = await cloudinary.uploader.upload(path);
+  //   } catch (error) {
+  //     // Skilum áfram villu frá Cloudinary, ef einhver
+  //     if (error.http_code && error.http_code === 400) {
+  //       return res.status(400).json({ errors: [{
+  //         field: 'image',
+  //         error: error.message,
+  //       }] });
+  //     }
 
+  //     console.error('Unable to upload file to cloudinary');
+  //     return next(error);
+  //   }
+
+  //   if (upload && upload.secure_url) {
+  //     product.image = upload.secure_url;
+  //   } else {
+  //     // Einhverja hluta vegna er ekkert `secure_url`?
+  //     return next(new Error('Cloudinary upload missing secure_url'));
+  //   }
+  // }
+  const fields = [
+    isString(serie.name) ? 'name' : null,
+    isString(serie.aired) ? 'aired' : null,
+    isString(serie.inProduction) ? 'inProduction' : null,
+    isString(serie.tagline) ? 'tagline' : null,
+    isString(serie.thumbnail) ? 'thumbnail' : null,
+    isString(serie.description) ? 'description' : null,
+    isString(serie.language) ? 'language' : null,
+    isString(serie.network) ? 'network' : null,
+    isString(serie.url) ? 'url' : null,
+  ];
+
+  const values = [
+    isString(serie.name) ? xss(serie.title) : null,
+    isString(serie.aired) ? xss(serie.price) : null,
+    isString(serie.inProduction) ? xss(serie.inProduction) : null,
+    isString(serie.tagline) ? xss(serie.tagline) : null,
+    isString(serie.thumbnail) ? xss(serie.thumbnail) : null,
+    isString(serie.description) ? xss(serie.description) : null,
+    isString(serie.language) ? xss(serie.language) : null,
+    isString(serie.network) ? xss(serie.network) : null,
+    isString(serie.url) ? xss(serie.url) : null,
+  ];
+
+  if (!fields.filter(Boolean).length === 0) {
+    return res.status(400).json({ error: 'Nothing to update' });
+  }
+
+  fields.push('updated');
+
+  const result = await conditionalUpdate('series', id, fields, values);
+  return res.status(201).json(result.rows[0]);
+}
+// Finnur fjölda einkunna og meðaleinkunn
+async function getStats(id) {
+  const stats = await query(
+    `SELECT COUNT(*),AVG(rating) from users_series where FK_serie=$1`,
+    [id],
+  );
+  return stats.rows[0];
+
+}
 // Birtir upplýsingar um stakan sjónvarpsþátt
 export async function listSerie(req, res) {
   const { id } = req.params;
-  console.log('serie req params', req.params);
+  const stats = await getStats(id);
   const serie = await findSerie(id);
   const genre = await findGenre(id);
   const seasonInfo = await findSeasonInfo(id)
@@ -265,6 +277,7 @@ export async function listSerie(req, res) {
   result.push(serie)
   result.push(genre)
   result.push(seasonInfo)
+  result.push(stats)
   return res.json(result);
 }
 
@@ -315,6 +328,77 @@ export async function findSeasonInfo(id) {
     [id],
   );
   return season.rows;
+}
+async function validateRating(rating){
+  let validation = [];
+
+  if (!isInt(rating)) {
+    validation.push({
+      field: 'rate',
+      error: 'Rating must be an integer,one of 0, 1, 2, 3, 4, 5',
+    });
+    return validation
+  }
+
+}
+export async function rateSerie(req, res) {
+  const { user } = requireAuth;
+  const { FK_serie } = req.params;
+  const { rating } = req.body;
+  const validation = await validateRating(rating);
+
+  if (validation.length > 0) {
+    return res.status(400).json({
+      errors: validation,
+    });
+  }
+
+  const q = `
+  INSERT INTO users_series (FK_user,FK_serie,rating) VALUES ($1,$2,$3)
+        RETURNING *`;
+
+  const values = [
+    xss[user],
+    xss[FK_serie],
+    xss(rating)
+  ];
+  const result = await query(q, values);
+  return res.json(result.rows[0]);
+
+}
+
+export async function updateRating(req, res) {
+  const { user } = requireAuth;
+  const { FK_serie } = req.params;
+  const { rating } = req.body;
+  const ratings = { user, FK_serie, rating };
+
+  const validations = await validateRating(ratings);
+
+  if (!validations.length > 0) {
+    return res.status(404).json({ error: 'Serie not found' });
+  }
+
+  const fields = [
+    isInt(ratings.FK_user) ? 'FK_user' : null,
+    isString(ratings.FK_serie) ? 'FK_serie' : null,
+    isString(ratings.rating) ? 'rating' : null,
+  ];
+
+  const values = [
+    isInt(ratings.FK_user) ? xss(ratings.FK_user) : null,
+    isInt(ratings.FK_serie) ? xss(ratings.FK_serie) : null,
+    isInt(ratings.rating) ? xss(ratings.rating) : null,
+  ];
+
+  if (!fields.filter(Boolean).length === 0) {
+    return res.status(400).json({ error: 'Nothing to update' });
+  }
+
+  fields.push('updated');
+
+  const result = await conditionalUpdate('users_series', id, fields, values);
+  return res.status(201).json(result.rows[0]);
 }
 
 router.get('/', catchErrors(listSeries));

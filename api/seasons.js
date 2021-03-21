@@ -1,7 +1,8 @@
+import xss from 'xss';
 import { pagedQuery, query } from '../src/db.js';
 import { addPageMetadata, catchErrors } from '../src/utils.js';
 import express from 'express';
-import { isInt } from '../authentication/validations.js';
+import { isInt, isNotEmptyString, toPositiveNumberOrDefault, isDate, isString } from '../authentication/validations.js';
 import { findSeasonInfo } from './series.js';
 
 export const router = express.Router();
@@ -65,7 +66,7 @@ export async function listSeason(req, res) {
   return res.json({ seasonItems, episodes });
 }
 
-async function validateSeason({ name, seasonNo, aired, overview, seasonPoster, serieName } = {},
+async function validateSeason({ name, seasonNo, aired, overview, seasonPoster, serieName, serieNumber } = {},
   id = null,
 ) {
   const validation = [];
@@ -80,8 +81,8 @@ async function validateSeason({ name, seasonNo, aired, overview, seasonPoster, s
 
     // check if season name exists in season
     const seasonExists = await query(
-      'SELECT id FROM season WHERE name = $1 AND FK_serie=$2 AND seasonNumber=$3',
-      [name, serieNumber, seasonNumber],
+      'SELECT id FROM season WHERE name = $1 AND FK_serie=$2 AND seasonNo=$3',
+      [name, serieNumber, seasonNo],
     );
 
     if (seasonExists.rows.length > 0) {
@@ -100,7 +101,7 @@ async function validateSeason({ name, seasonNo, aired, overview, seasonPoster, s
   }
   // validate season number
   if (seasonNo || isEmpty(seasonNo)) {
-    if (toPositiveNumberOrDefault(episodeNo, 0) <= 0) {
+    if (toPositiveNumberOrDefault(seasonNo, 0) <= 0) {
       validation.push({
         field: 'seasonNo',
         error: 'Season number must be a positive integer',
@@ -145,15 +146,18 @@ async function validateSeason({ name, seasonNo, aired, overview, seasonPoster, s
 export async function createSeason(req, res, next) {
   const { serieNumber } = req.params;
   const serie = await query(
-    `SELECT * FROM serie
+    `SELECT * FROM series
       WHERE id=$1`,
     [serieNumber]);
-  if (!season) {
+  if (!serie) {
     return res.status(404).json({ error: 'Serie not found. Not possible to create a season in a non-existing serie.' })
   }
+  console.log("serie", serie);
+  let serieItem = serie.rows[0];
 
-  const { name, seasonNo, aired, overview, seasonPoster, serieName } = req.body;
-  const season = { name, seasonNo, aired, overview, seasonPoster, serieName };
+  const { name, seasonNo, aired, overview, seasonPoster } = req.body;
+  const serieName = serieItem.name;
+  const season = { name, seasonNo, aired, overview, seasonPoster, serieName, serieNumber };
   const validations = await validateSeason(season);
 
   if (validations.length > 0) {
@@ -163,8 +167,8 @@ export async function createSeason(req, res, next) {
   }
 
   const q = `
-  INSERT INTO season(name, seasonNo, aired, overview, seasonPoster, serieName) 
-  VALUES ($1, $2, $3, $4, $5, $6)
+  INSERT INTO season(name, seasonNo, aired, overview, seasonPoster, serieName, FK_serie) 
+  VALUES ($1, $2, $3, $4, $5, $6, $7)
         RETURNING *`;
 
   const values = [
@@ -174,43 +178,25 @@ export async function createSeason(req, res, next) {
     xss(season.overview),
     xss(season.seasonPoster),
     xss(season.serieName),
+    xss(season.serieNumber)
   ];
   const result = await query(q, values);
   return res.json(result.rows[0]);
 }
 export async function deleteSeason(req, res) {
-  const { seasonNumber } = req.params;
+  const { serieNumber, seasonNumber } = req.params;
 
-  const season = await await query(`SELECT * FROM episodes WHERE seasonNo=$1`, [seasonNumber]);
-
+  const episodes = await query(`SELECT * FROM episodes WHERE seasonNumber=$1 AND FK_serie=$2`, [seasonNumber, serieNumber]);
+  const season = await query(`SELECT * FROM season WHERE seasonNo=$1 AND FK_serie=$2`, [seasonNumber, serieNumber]);
   if (!season) {
     return res.status(404).json({ error: 'Season not found' });
   }
-  const q = 'DELETE FROM season WHERE seasonNo = $1'
-  await query(q, [seasonNumber]);
-  return res.status(204).json({});
-}
-export async function rateSeason(req, res) {
-  //const { rating } = 
-  let validation = [];
-
-  if (!isInt(rating)) {
-    validation.push({
-      field: 'rate',
-      error: 'Rating must be an integer,one of 0, 1, 2, 3, 4, 5',
-    });
-    return validation
+  if (episodes) {
+    const q_ep = 'DELETE FROM episodes WHERE seasonNumber=$1 AND FK_serie=$2';
+    await query(q_ep, [seasonNumber, serieNumber]);
   }
-  const userSeries = 'SELECT * FROM user_series WHERE FK_serie=$1 AND FK_user=$2'
-  const q = `
-  INSERT INTO user_series(rating) 
-  VALUES ($1)
-        RETURNING *`;
 
-  const values = [
-    xss(userSeries.rating),
-  ];
-  const result = await query(q, values);
-  return res.json(result.rows[0]);
-
+  const q_season = 'DELETE FROM season WHERE seasonNo = $1 AND FK_serie=$2'
+  await query(q_season, [seasonNumber, serieNumber]);
+  return res.status(204).json({});
 }

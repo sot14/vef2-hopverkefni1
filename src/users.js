@@ -16,7 +16,7 @@ export async function listUsers(req, res) {
         id, username,password, email, admin 
       FROM
         users
-      ORDER BY updated DESC`,
+      ORDER BY id DESC`,
         [],
         { offset, limit },
     );
@@ -86,11 +86,11 @@ export async function currentUserRoute(req, res) {
     const { user: { id } = {} } = req;
 
     const user = await findById(id);
-
+  
     if (!user) {
-        return res.status(404).json({ error: 'User not found' });
+      return res.status(404).json({ error: 'User not found' });
     }
-
+  
     return res.json(user);
 }
 

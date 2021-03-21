@@ -83,7 +83,7 @@ export function requireAuth(req, res, next) {
       }
       console.log("userrrrrrr: ",user)
       req.user = user;
-      return next();
+      return next(req.user);
     })
     (req, res, next);
 }
