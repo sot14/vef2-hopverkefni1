@@ -441,12 +441,3 @@ export async function updateRating(req, res) {
   return res.status(201).json(result.rows[0]);
 }
 
-router.get('/', catchErrors(listSeries));
-
-router.get('/:id', catchErrors(listSerie));
-router.get('/:id/season', catchErrors(listSeasons));
-router.delete('/:id', requireAdmin, catchErrors(deleteSeries));
-router.patch('/:id', requireAdmin, catchErrors(updateSeries));
-
-router.get('/:serieNumber/season/:seasonNumber', catchErrors(listSeason));
-router.post('/', requireAdmin, catchErrors(createSeries));
