@@ -145,14 +145,16 @@ export async function findById(id) {
 export async function createUser(username, password, email, admin = false) {
   const hashedPassword = await bcrypt.hash(password, bcryptRounds);
 
+  const findId = await query(`SELECT MAX(id) FROM users`, []);
+  const userId = findId.rows[0].max + 1;
   const q = `
     INSERT INTO
-      users (username, email, password, admin)
+      users (id, username, email, password, admin)
     VALUES
-      ($1, $2, $3, $4)
+      ($1, $2, $3, $4, $5)
     RETURNING *`;
 
-  const values = [xss(username), xss(email), hashedPassword, admin];
+  const values = [userId, xss(username), xss(email), hashedPassword, admin];
   const result = await query(
     q,
     values,

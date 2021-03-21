@@ -16,7 +16,7 @@ export async function listUsers(req, res) {
         id, username,password, email, admin 
       FROM
         users
-      ORDER BY updated DESC`,
+      ORDER BY id DESC`,
         [],
         { offset, limit },
     );
@@ -73,7 +73,7 @@ export async function updateUserRoute(req, res) {
     const q = `
       UPDATE
         users
-      SET admin = $1, 
+      SET admin = $1
       WHERE id = $2
       RETURNING
        id, username,password, email, admin `;
