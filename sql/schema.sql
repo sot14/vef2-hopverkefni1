@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS season(
     seasonPoster varchar (255),
     serieName varchar(128),
     FK_serie integer not null,
-    CONSTRAINT FK_serie FOREIGN KEY (FK_serie) REFERENCES series (id)
+    CONSTRAINT FK_serie FOREIGN KEY (FK_serie) REFERENCES series (id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS episodes(
@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS episodes(
      overview varchar (1024),
      seasonNumber integer check (seasonNumber > 0),
      FK_serie serial,
-     CONSTRAINT FK_serie FOREIGN KEY (FK_serie) REFERENCES series(id)
+     CONSTRAINT FK_serie FOREIGN KEY (FK_serie) REFERENCES series(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS users(
@@ -58,8 +58,8 @@ CREATE TABLE IF NOT EXISTS users(
 
 CREATE TABLE IF NOT EXISTS users_series(
   id serial primary key,
-  CONSTRAINT FK_serie FOREIGN KEY (id) REFERENCES series(id),
-  CONSTRAINT FK_user FOREIGN KEY (id) REFERENCES users(id),
+  CONSTRAINT FK_serie FOREIGN KEY (id) REFERENCES series(id) ON DELETE CASCADE,
+  CONSTRAINT FK_user FOREIGN KEY (id) REFERENCES users(id) ON DELETE CASCADE,
   state varchar(64),
   rating INTEGER CHECK(rating < 6)
 );

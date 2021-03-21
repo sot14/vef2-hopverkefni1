@@ -11,7 +11,7 @@ const readFileAsync = util.promisify(fs.readFile);
 const {
     DATABASE_URL: databaseUrl,
     CLOUDINARY_URL: cloudinaryUrl,
-    IMAGE_FOLDER: imageFolder = './data/img',
+    IMAGE_FOLDER: imageFolder = '../data/img',
   } = process.env;
 
 dotenv.config();
@@ -31,7 +31,7 @@ async function main () {
 
      // henda töflum
     try {
-        const createTable = await readFileAsync('./sql/drop.sql');
+        const createTable = await readFileAsync('../sql/drop.sql');
         await query(createTable.toString('utf8'));
         console.info('Töflum hent');
     } catch (e) {
@@ -41,7 +41,7 @@ async function main () {
 
     // búa til töflur út frá skema
     try {
-        const createTable = await readFileAsync('./sql/schema.sql');
+        const createTable = await readFileAsync('../sql/schema.sql');
         await query(createTable.toString('utf8'));
         console.info('Tafla búin til');
     } catch (e) {
@@ -51,11 +51,11 @@ async function main () {
 
     console.log('gonna read files');
 
-    const series = await readDataFromCSV('./data/series.csv');
+    const series = await readDataFromCSV('../data/series.csv');
 
-    const seasons = await readDataFromCSV('./data/seasons.csv');
+    const seasons = await readDataFromCSV('../data/seasons.csv');
     
-    const episodes = await readDataFromCSV('./data/episodes.csv');
+    const episodes = await readDataFromCSV('../data/episodes.csv');
     
     // Kom ekki inn á réttum tíma þrátt fyrir await svo þurfti að nota settimeout
     setTimeout(async () => {

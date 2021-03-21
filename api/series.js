@@ -1,10 +1,10 @@
 import xss from 'xss';
 import bcrypt from 'bcrypt';
 import { addPageMetadata, catchErrors } from '../src/utils.js';
-import { query, pagedQuery } from '../src/db.js';
+import { query, pagedQuery,conditionalUpdate } from '../src/db.js';
 import express from 'express';
 import { requireAuth, checkUserIsAdmin } from '../authentication/registered.js';
-import { listSeason, listSeasons, router as seasonRouter } from './seasons.js';
+import { listSeason, listSeasons } from './seasons.js';
 
 const requireAdmin = [
   requireAuth,
@@ -18,6 +18,8 @@ import {
   isEmpty,
   isNotEmptyString,
   isString,
+  isBoolean,
+  isDate,
 } from '../authentication/validations.js'
 
 // Birtir upplýsingar um allar sjónvarpsþáttaseríur
@@ -36,12 +38,6 @@ export async function listSeries(req, res) {
   );
   return res.json(seriesWithPage);
 }
-// validation fyrir date
-function isDate(date) {
-  var temp = date.split('/');
-  var d = new Date(temp[2] + '/' + temp[0] + '/' + temp[1]);
-  return (d && (d.getMonth() + 1) == temp[0] && d.getDate() == Number(temp[1]) && d.getFullYear() == Number(temp[2]));
-}
 
 // Valideitar gögn þegar nýjum sjónvarpsþætti er bætt við. 
 async function validateSerie({ name, aired, inProduction, tagline, thumbnail, description, language, network, url } = {},
@@ -51,68 +47,76 @@ async function validateSerie({ name, aired, inProduction, tagline, thumbnail, de
 
 
   if (!patching || name || isEmpty(name)) {
-    if (!isNotEmptyString(name, { min: 1, max: 255 })) {
+    if (!isNotEmptyString(name, { min: 1, max: 256 })) {
       validation.push({
         field: 'name',
-        error: 'Name must be between 1 and 255 characters'
+        error: 'Name must be between 1 and 256 characters'
       });
     }
   }
-
-  if (!isDate(aired)) {
-    validation.push({
-      field: 'aired',
-      error: 'Input must be a date'
-    })
+  if (!patching || aired || isEmpty(aired)) {
+    if (!isDate(aired)) {
+      validation.push({
+        field: 'aired',
+        error: 'Input must be a date'
+      })
+    }
   }
-
-  if (inProduction !== 'false' || 'true') {
-    validation.push({
-      field: 'inProduction',
-      error: 'Input must be a boolean (true/false)'
-    })
+  if (!patching || inProduction || isEmpty(inProduction)) {
+    if (!isBoolean(inProduction)) {
+      validation.push({
+        field: 'inProduction',
+        error: 'Input must be a boolean (true/false)'
+      })
+    }
   }
-
-  if (!isString(tagline)) {
-    validation.push({
-      field: 'tagline',
-      error: 'Input must be a string'
-    })
+  if (!patching || tagline || isEmpty(tagline)) {
+    if (!isString(tagline)) {
+      validation.push({
+        field: 'tagline',
+        error: 'Input must be a string'
+      })
+    }
   }
-
-  if (!isNotEmptyString(thumbnail, { min: 1, max: 255 })) {
-    validation.push({
-      field: 'thumbnail',
-      error: 'Thumbnail path must be between 1 and 255 characters'
-    });
+  if (!patching || thumbnail || isEmpty(thumbnail)) {
+    if (!isNotEmptyString(thumbnail, { min: 1, max: 256 })) {
+      validation.push({
+        field: 'thumbnail',
+        error: 'Thumbnail path must be between 1 and 256 characters'
+      });
+    }
   }
-
-  if (!isString(description)) {
-    validation.push({
-      field: 'description',
-      error: 'Input must be a string'
-    })
+  if (!patching || description || isEmpty(description)) {
+    if (!isString(description)) {
+      validation.push({
+        field: 'description',
+        error: 'Input must be a string'
+      })
+    }
   }
-
-  if (!isString(language)) {
-    validation.push({
-      field: 'language',
-      error: 'Input must be a string'
-    })
+  if (!patching || language || isEmpty(language)) {
+    if (!isString(language)) {
+      validation.push({
+        field: 'language',
+        error: 'Input must be a string'
+      })
+    }
   }
-
-  if (!isString(network)) {
-    validation.push({
-      field: 'network',
-      error: 'Input must be a string'
-    })
+  if (!patching || network || isEmpty(network)) {
+    if (!isString(network)) {
+      validation.push({
+        field: 'network',
+        error: 'Input must be a string'
+      })
+    }
   }
-
-  if (!isString(url)) {
-    validation.push({
-      field: 'url',
-      error: 'Input must be a string'
-    })
+  if (!patching || url || isEmpty(url)) {
+    if (!isString(url)) {
+      validation.push({
+        field: 'url',
+        error: 'Input must be a string'
+      })
+    }
   }
   return validation;
 }
@@ -148,6 +152,30 @@ export async function createSeries(req, res, next) {
   ];
   const result = await query(q, values);
   return res.json(result.rows[0]);
+}
+
+async function deleteSeries(req, res) {
+  const { id } = req.params;
+
+  const serie = await findSerie(id);
+
+  if (!serie) {
+    return res.status(404).json({ error: 'Serie not found' });
+  }
+  const q = 'DELETE FROM series WHERE ID = $1'
+  await query(q, [id]);
+  return res.status(204).json({});
+}
+
+async function updateSeries(req, res) {
+  const { id } = req.params;
+
+  const serie = await findSerie(id);
+
+  if (!serie) {
+    return res.status(404).json({ error: 'Serie not found' });
+  }
+
 }
 
 // Birtir upplýsingar um stakan sjónvarpsþátt
@@ -218,7 +246,11 @@ export async function findSeasonInfo(id) {
 }
 
 router.get('/', catchErrors(listSeries));
+
 router.get('/:id', catchErrors(listSerie));
 router.get('/:id/season', catchErrors(listSeasons));
+router.delete('/:id', requireAdmin, catchErrors(deleteSeries));
+router.patch('/:id', requireAdmin, catchErrors(updateSeries));
+
 router.get('/:serieNumber/season/:seasonNumber', catchErrors(listSeason));
-router.post('/',requireAdmin,catchErrors(createSeries));
+router.post('/', requireAdmin, catchErrors(createSeries));
