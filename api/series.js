@@ -168,12 +168,7 @@ export async function deleteSeries(req, res) {
   return res.status(204).json({});
 }
 
-<<<<<<< HEAD
-async function updateSeries(req, res) {
-
-=======
 export async function updateSeries(req, res) {
->>>>>>> 40941c04d1a96508ec404d698fdf1d15258cfab6
   const { id } = req.params;
   const { name, aired, inProduction, tagline, thumbnail, description, language, network, url } = req.body;
   const serie = { name, aired, inProduction, tagline, thumbnail, description, language, network, url };
@@ -321,3 +316,13 @@ export async function findSeasonInfo(id) {
   );
   return season.rows;
 }
+
+router.get('/', catchErrors(listSeries));
+
+router.get('/:id', catchErrors(listSerie));
+router.get('/:id/season', catchErrors(listSeasons));
+router.delete('/:id', requireAdmin, catchErrors(deleteSeries));
+router.patch('/:id', requireAdmin, catchErrors(updateSeries));
+
+router.get('/:serieNumber/season/:seasonNumber', catchErrors(listSeason));
+router.post('/', requireAdmin, catchErrors(createSeries));
