@@ -30,7 +30,6 @@ router.get('/', (req, res) => {
   });
 
 //export const series = readDataFromCSV('./data/series.csv');
-//export const seasons = readDataFromCSV('./data/seasons.csv');
+export const seasons = readDataFromCSV('../data/seasons.csv');
 //export const episodes = readDataFromCSV('./data/episodes.csv');
-
 

@@ -54,6 +54,7 @@ async function main () {
 
     const seasons = await readDataFromCSV('../data/seasons.csv');
     
+    
     const episodes = await readDataFromCSV('../data/episodes.csv');
     
     // Kom ekki inn á réttum tíma þrátt fyrir await svo þurfti að nota settimeout
@@ -170,18 +171,19 @@ async function insertSeries(series) {
 
 async function insertSeasons(seasons) {
     console.log('inserting seasons', seasons.length);
+    console.log(seasons)
 
     seasons.forEach((season) => {
         const queryString = `INSERT INTO season(name, seasonNo, aired, description, seasonPoster, serieName, FK_serie) VALUES ($1, $2, $3, $4, $5, $6, $7);`;
         
         const values = [
             season.name,
-            season.number || null,
-            season.airDate || null,
+            season.number,
+            season.airDate,
             season.overview || null,
             season.poster || null,
-            season.serie || null,
-            season.serieId || null
+            season.serie,
+            season.serieId
         ];
         try {
             query(queryString, values);
