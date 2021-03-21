@@ -2,7 +2,6 @@
 export function isEmpty(s) {
     return s != null && !s;
   }
-  
   export function isInt(i) {
     return i !== '' && Number.isInteger(Number(i));
   }

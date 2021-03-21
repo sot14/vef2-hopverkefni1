@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS season(
     description varchar(1024),
     seasonPoster varchar (255),
     serieName varchar(128),
-    FK_serie serial,
+    FK_serie integer not null,
     CONSTRAINT FK_serie FOREIGN KEY (FK_serie) REFERENCES series (id)
 );
 
@@ -42,8 +42,8 @@ CREATE TABLE IF NOT EXISTS episodes(
      name varchar(128) not null,
      episodeNo integer not null check ( episodeNo > 0),
      aired date,
-     description varchar (1024),
-     FK_Season serial,
+     description varchar (6000),
+     FK_Season integer not null,
      CONSTRAINT FK_season FOREIGN KEY (id) REFERENCES season (id)
 );
 
