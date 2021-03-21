@@ -169,8 +169,12 @@ async function deleteSeries(req, res) {
 
 async function updateSeries(req, res) {
   const { id } = req.params;
+  const {name, aired, inProduction, tagline, thumbnail, description, language, network, url } = req.body;
+  const serie = { name, aired, inProduction, tagline, thumbnail, description, language, network, url};
 
-  const serie = await findSerie(id);
+  const validations = await validateSerie(serie, true, id);
+
+  //const serie = await findSerie(id);
 
   if (!serie) {
     return res.status(404).json({ error: 'Serie not found' });
