@@ -3,7 +3,13 @@ import bcrypt from 'bcrypt';
 import { addPageMetadata, catchErrors } from '../src/utils.js';
 import { query, pagedQuery } from '../src/db.js';
 import express from 'express';
-import {listSeason, listSeasons, router as seasonRouter} from './seasons.js';
+import { requireAuth, checkUserIsAdmin } from '../authentication/registered.js';
+import { listSeason, listSeasons, router as seasonRouter } from './seasons.js';
+
+const requireAdmin = [
+  requireAuth,
+  checkUserIsAdmin,
+];
 
 export const router = express.Router();
 let currentSerieID;
@@ -13,8 +19,6 @@ import {
   isEmpty,
   isNotEmptyString,
   isString,
-  toPositiveNumberOrDefault,
-  lengthValidationError
 } from '../authentication/validations.js'
 
 // Birtir upplýsingar um allar sjónvarpsþáttaseríur
@@ -33,65 +37,95 @@ export async function listSeries(req, res) {
   );
   return res.json(seriesWithPage);
 }
+// validation fyrir date
+function isDate(date) {
+  var temp = date.split('/');
+  var d = new Date(temp[2] + '/' + temp[0] + '/' + temp[1]);
+  return (d && (d.getMonth() + 1) == temp[0] && d.getDate() == Number(temp[1]) && d.getFullYear() == Number(temp[2]));
+}
+
 // Valideitar gögn þegar nýjum sjónvarpsþætti er bætt við. 
-/*
-async function validateSerie({ name, thumbnail } = {},
+async function validateSerie({ name, aired, inProduction, tagline, thumbnail, description, language, network, url } = {},
   patching = false,
-  id = null,
 ) {
   const validation = [];
+
 
   if (!patching || name || isEmpty(name)) {
     if (!isNotEmptyString(name, { min: 1, max: 255 })) {
       validation.push({
         field: 'name',
-        error: lengthValidationError(title, 1, 255),
+        error: 'Name must be between 1 and 255 characters'
       });
     }
-    const titleExists = await query(
-      'SELECT id FROM series WHERE name = $1',
-      [name],
-    );
-
-    if (titleExists.rows.length > 0) {
-      const current = titleExists.rows[0].id;
-
-      if (patching && id && current === toPositiveNumberOrDefault(id, 0)) {
-        // we can patch our own title
-      } else {
-        const error = `Name already exists in series with id ${current}.`;
-        validation.push({
-          field: 'name',
-          error,
-        });
-      }
-    }
   }
 
-  const cat = await query(
-    'SELECT id FROM series WHERE title = $1',
-    [title],
-  );
-
-  if (cat.rows.length > 0) {
-    const currentCat = cat.rows[0].id;
-    const error = `Serie already exists in series with id ${currentCat}.`;
-    return [{ field: 'name', error }];
+  if (!isDate(aired)) {
+    validation.push({
+      field: 'aired',
+      error: 'Input must be a date'
+    })
   }
 
-  return [];
+  if (inProduction !== 'false' || 'true') {
+    validation.push({
+      field: 'inProduction',
+      error: 'Input must be a boolean (true/false)'
+    })
+  }
+
+  if (!isString(tagline)) {
+    validation.push({
+      field: 'tagline',
+      error: 'Input must be a string'
+    })
+  }
+
+  if (!isNotEmptyString(thumbnail, { min: 1, max: 255 })) {
+    validation.push({
+      field: 'thumbnail',
+      error: 'Thumbnail path must be between 1 and 255 characters'
+    });
+  }
+
+  if (!isString(description)) {
+    validation.push({
+      field: 'description',
+      error: 'Input must be a string'
+    })
+  }
+
+  if (!isString(language)) {
+    validation.push({
+      field: 'language',
+      error: 'Input must be a string'
+    })
+  }
+
+  if (!isString(network)) {
+    validation.push({
+      field: 'network',
+      error: 'Input must be a string'
+    })
+  }
+
+  if (!isString(url)) {
+    validation.push({
+      field: 'url',
+      error: 'Input must be a string'
+    })
+  }
+  return validation;
 }
 
-*/
-
 // Setur nýjan sjónvarpsþátt inn í gagnagrunn ef allt er í lagi eftir validation,
-
 export async function createSeries(req, res, next) {
+
   const { name, aired, inProduction, tagline, thumbnail, description, language, network, url } = req.body;
   const serie = { name, aired, inProduction, tagline, thumbnail, description, language, network, url };
-  //const validations = await validateSerie(serie);
+  const validations = await validateSerie(serie);
 
-  if (serie.length > 0) {
+  if (validations.length > 0) {
     return res.status(400).json({
       errors: validations,
     });
@@ -132,7 +166,6 @@ export async function listSerie(req, res) {
   let result = []
   result.push(serie)
   result.push(genre)
-  console.log("seasonIngogogofo: ",seasonInfo)
   result.push(seasonInfo)
   return res.json(result);
 }
@@ -151,10 +184,6 @@ export async function findSerie(id) {
     WHERE id = $1`,
     [id],
   );
-
-  if (episode.rows.length !== 1) {
-    return null;
-  }
 
   return episode.rows[0]
 }
@@ -187,6 +216,11 @@ export async function findSeasonInfo(id) {
     WHERE fk_serie = $1`,
     [id],
   );
-  return season.rows[0];
+  return season.rows;
 }
 
+router.get('/', catchErrors(listSeries));
+router.get('/:id', catchErrors(listSerie));
+router.get('/:id/season', catchErrors(listSeasons));
+router.get('/:serieNumber/season/:seasonNumber', catchErrors(listSeason));
+router.post('/',requireAdmin,catchErrors(createSeries));
