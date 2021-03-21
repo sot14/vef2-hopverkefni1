@@ -26,7 +26,8 @@ import {
     updateSeries,
     deleteSeries,
     rateSerie,
-    updateRating
+    updateRating,
+    deleteRating
 } from '../api/series.js'
 
 import {
@@ -137,8 +138,9 @@ router.post('/tv', requireAdmin, catchErrors(createSeries));
 router.get('/tv/:id', catchErrors(listSerie));
 router.delete('/tv/:id', requireAdmin, catchErrors(deleteSeries));
 router.patch('/tv/:id', requireAdmin, catchErrors(updateSeries));
-router.get('/tv/:id/rate',requireAuth,catchErrors(rateSerie));
-router.patch('/tv/:id/rate',requireAuth,catchErrors(updateRating));
+//router.get('/tv/:id/rate',requireAuth,catchErrors(rateSerie));
+//router.patch('/tv/:id/rate',requireAuth,catchErrors(updateRating));
+router.get('/tv/:id/rate',catchErrors(deleteRating));
 
 // Routes fyrir seasons
 router.get('/tv/:id/season', catchErrors(listSeasons));

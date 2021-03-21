@@ -382,7 +382,7 @@ async function validateRating(rating){
 
 }
 export async function rateSerie(req, res) {
-  const { user } = requireAuth;
+  const { user } = req.user.id;
   const { FK_serie } = req.params;
   const { rating } = req.body;
   const validation = await validateRating(rating);
@@ -439,5 +439,14 @@ export async function updateRating(req, res) {
 
   const result = await conditionalUpdate('users_series', id, fields, values);
   return res.status(201).json(result.rows[0]);
+}
+
+export async function deleteRating(req, res) {
+  const { id } = req.params;
+  const user = req.user.id;
+
+  const q = 'DELETE FROM users_series WHERE FK_serie = $1 AND FK_user = $2'
+  await query(q, [id,user]);
+  return res.status(204).json({});
 }
 
