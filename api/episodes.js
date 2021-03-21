@@ -122,29 +122,16 @@ async function validateEpisode(
 }
 
 export async function deleteEpisode(req, res) {
-    const { id } = req.params;
+    const { episodeNumber } = req.params;
   
-    const product = await getProduct(id);
+    const episode = await query(`SELECT * FROM episodes WHERE episodeNo=$1`, [episodeNumber]);
   
-    if (!product) {
-      return res.status(404).json({ error: 'Product not found' });
+    if (!episode) {
+      return res.status(404).json({ error: 'episode not found' });
     }
   
-    // Athuga hvort vara sé til í körfu/pöntun
-    const countQuery = 'SELECT COUNT(*) FROM orderLines WHERE product_id = $1';
-    const countResult = await query(countQuery, [id]);
-  
-    const { count } = countResult.rows[0];
-  
-    // Leyfum bara að eyða tómum flokkum
-    if (toPositiveNumberOrDefault(count, 0) > 0) {
-      return res.status(400).json({
-        error: 'Product exists in cart or order, cannot delete.',
-      });
-    }
-  
-    const q = 'DELETE FROM products WHERE ID = $1';
-    await query(q, [id]);
+    const q = 'DELETE FROM episodes WHERE episodeNo = $1';
+    await query(q, [episodeNumber]);
   
     return res.status(204).json({});
   }
