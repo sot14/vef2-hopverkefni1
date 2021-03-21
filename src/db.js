@@ -3,6 +3,10 @@ import dotenv from 'dotenv';
 import { toPositiveNumberOrDefault } from '../authentication/validations.js';
 const { Client } = pg;
 
+const {
+  NODE_ENV: nodeEnv = 'development',
+} = process.env;
+
 export async function query(sqlQuery, values = []) {
   const connectionString = process.env.DATABASE_URL;
   const ssl = nodeEnv !== 'development' ? { rejectUnauthorized: false } : false;
