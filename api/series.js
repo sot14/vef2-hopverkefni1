@@ -6,7 +6,6 @@ import express from 'express';
 import {listSeason, listSeasons, router as seasonRouter} from './seasons.js';
 
 export const router = express.Router();
-let currentSerieID;
 
 import {
   isInt,

@@ -1,4 +1,4 @@
-import { pagedQuery } from '../src/db.js';
+import { pagedQuery, query } from '../src/db.js';
 import { addPageMetadata, catchErrors } from '../src/utils.js';
 import express from 'express';
 import { isInt } from '../authentication/validations.js';
@@ -31,27 +31,31 @@ export async function listSeasons(req, res) {
 // Birtir upplýsingar um staka seríu
 export async function listSeason( req, res) {
     const { serieNumber, seasonNumber } = req.params;
-    const { offset = 0, limit = 10 } = req.query;
+    const { offset = 0, limit = 10 } = req.query; // TODO: þetta á ekki að vera paged því það er bara eitt season
   
-    const season = await pagedQuery(
-      `SELECT
-      *
-      FROM
-        season
+    const season = await query(
+      `SELECT * FROM season
       WHERE seasonNo = $1
       AND FK_serie = $2`,
-      [seasonNumber, serieNumber],
-      {offset, limit}
+      [seasonNumber, serieNumber]
     );
     console.log("found season", season);
   
     if (!season ) {
       return res.status(404).json({ error: 'Season not found' });
     }
+
+    const episodes = await pagedQuery(
+        `SELECT * FROM episodes
+            WHERE FK_season = $1`,
+        [season.id],
+        {offset, limit}
+    );
+
+    if (!episodes ) {
+        return res.status(404).json({ error: 'Episodes of season not found' });
+      }
    
-    return res.json(season);
+    return res.json({season, episodes});
   }
   
-
-// router.get('/', catchErrors(listSeasons));
-// router.get('/:id', catchErrors(listSeason));

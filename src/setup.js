@@ -12,7 +12,7 @@ const readFileAsync = util.promisify(fs.readFile);
 const {
     DATABASE_URL: databaseUrl,
     CLOUDINARY_URL: cloudinaryUrl,
-    IMAGE_FOLDER: imageFolder = '../data/img',
+    IMAGE_FOLDER: imageFolder = './data/img',
   } = process.env;
 
 dotenv.config();
@@ -32,7 +32,7 @@ async function main () {
 
      // henda töflum
     try {
-        const createTable = await readFileAsync('../sql/drop.sql');
+        const createTable = await readFileAsync('./sql/drop.sql');
         await query(createTable.toString('utf8'));
         console.info('Töflum hent');
     } catch (e) {
@@ -42,7 +42,7 @@ async function main () {
 
     // búa til töflur út frá skema
     try {
-        const createTable = await readFileAsync('../sql/schema.sql');
+        const createTable = await readFileAsync('./sql/schema.sql');
         await query(createTable.toString('utf8'));
         console.info('Tafla búin til');
     } catch (e) {
@@ -50,12 +50,13 @@ async function main () {
         return;
     }
 
-    const series = await readDataFromCSV('../data/series.csv');
+    console.log('gonna read files');
 
-    const seasons = await readDataFromCSV('../data/seasons.csv');
+    const series = await readDataFromCSV('./data/series.csv');
+
+    const seasons = await readDataFromCSV('./data/seasons.csv');
     
-    
-    const episodes = await readDataFromCSV('../data/episodes.csv');
+    const episodes = await readDataFromCSV('./data/episodes.csv');
     
     // Kom ekki inn á réttum tíma þrátt fyrir await svo þurfti að nota settimeout
     setTimeout(async () => {
@@ -86,6 +87,15 @@ async function main () {
     // language: 'en',
     // network: 'Disney+',
     // homepage: 'https://www.disneyplus.com/series/wandavision/4SrN28ZjDLwH'
+
+    // season::
+    // name: 'Season 13',
+    // number: '13',
+    // airDate: '2001-11-06',
+    // overview: "The Simpsons' thirteenth season originally aired on the Fox network between November 6, 2001 and May 22, 2002 and consists of 22 episodes. The show runner for the thirteenth production season was Al Jean who executive-produced 17 episodes. Mike Scully executive-produced the remaining five, which were all hold-overs that were produced for the previous season. The Simpsons is an animated series about a working-class family, which consists of Homer, Marge, Bart, Lisa, and Maggie. The show is set in the fictional city of Springfield, and lampoons American culture, society, television and many aspects of the human condition.\\n\\nThe season won an Annie Award for Best Animated Television Production, and was nominated for several other awards, including two Primetime Emmy Awards, three Writers Guild of America Awards, and an Environmental Media Award. The Simpsons ranked 30th in the season ratings with an average viewership of 12.4 million viewers. It was the second highest rated show on Fox after Malcolm in the Middle. The DVD boxset was released in the United States and Canada on August 24, 2010, eight years after it had completed broadcast on television.",
+    // poster: 'wQTdRc2sWgAKFHS1BTHdIzVRmwU.jpg',
+    // serie: 'The Simpsons',
+    // serieId: '18'
 }
 
 async function insertSeries(series) {
@@ -103,7 +113,7 @@ async function insertSeries(series) {
             serie.name,
             serie.airDate,
             serie.inProduction,
-            serie.tagline,
+            serie.tagline || null,
             serie.image, 
             serie.description,
             serie.language,
@@ -115,8 +125,6 @@ async function insertSeries(series) {
         } catch(e) {
             console.error('villa við að inserta series', e);
         }
-
-        
 
         let currentGenres = serie.genres;
         currentGenres = currentGenres.split(',');
@@ -171,10 +179,10 @@ async function insertSeries(series) {
 
 async function insertSeasons(seasons) {
     console.log('inserting seasons', seasons.length);
-    console.log(seasons)
 
     seasons.forEach((season) => {
-        const queryString = `INSERT INTO season(name, seasonNo, aired, description, seasonPoster, serieName, FK_serie) VALUES ($1, $2, $3, $4, $5, $6, $7);`;
+    
+        const queryString = `INSERT INTO season(name, seasonNo, aired, overview, seasonPoster, serieName, FK_serie) VALUES ($1, $2, $3, $4, $5, $6, $7);`;
         
         const values = [
             season.name,
@@ -196,14 +204,15 @@ async function insertSeasons(seasons) {
 async function insertEpisodes(episodes) {
     console.log('inserting episodes', episodes.length);
     episodes.forEach((episode) => {
-        const queryString = `INSERT INTO episodes(name, episodeNo, aired, description) VALUES ($1, $2, $3, $4);`;
+        const queryString = `INSERT INTO episodes(name, episodeNo, aired, overview, seasonNumber, FK_serie) VALUES ($1, $2, $3, $4, $5, $6);`;
         
         const values = [
             episode.name,
             episode.number,
-            episode.airDate,
-            episode.overview
-            // episode.season,
+            episode.airDate || null,
+            episode.overview,
+            episode.season,
+            episode.serieId
         ];
         try {
             query(queryString, values);

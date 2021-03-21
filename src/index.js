@@ -2,9 +2,7 @@ import express from 'express';
 import { catchErrors } from './utils.js';
 import { requireAuth, checkUserIsAdmin } from '../authentication/registered.js';
 import {router as imageRouter} from './images.js';
-import {listGenres, addGenre} from '../api/genres.js';
-import {router as seasonRouter} from '../api/seasons.js';
-import {listSeasons, listSeason} from '../api/seasons.js';
+
 
 const requireAdmin = [
     requireAuth,
@@ -26,6 +24,15 @@ import {
     listSerie,
     router as seriesRouter
 } from '../api/series.js'
+
+import {
+    listGenres, 
+    addGenre
+} from '../api/genres.js';
+import {
+    listSeasons, 
+    listSeason
+} from '../api/seasons.js';
 
 function indexRoute(req, res) {
     return res.json({
@@ -113,11 +120,11 @@ router.patch('/users/me', requireAuth, catchErrors(updateCurrentUser));
 
 // Routes fyrir tv
 
-router.use('/tv', seriesRouter);
-//router.use('/tv/:id', seriesRouter);
+router.get('/tv', catchErrors(listSeries));
+router.get('/tv/:id', catchErrors(listSerie));
 
-// router.use('/tv/:id/season', seasonRouter);
-// router.get('/tv/:id/season/:id', catchErrors(listSeason));
+router.get('/tv/:id/season', catchErrors(listSeasons));
+router.get('/tv/:serieNumber/season/:seasonNumber', catchErrors(listSeason));
 
 router.get('/genres', catchErrors(listGenres));
 router.post('/genres', requireAdmin, catchErrors(addGenre));
