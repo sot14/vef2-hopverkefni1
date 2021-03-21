@@ -5,8 +5,9 @@ const { Client } = pg;
 
 export async function query(sqlQuery, values = []) {
   const connectionString = process.env.DATABASE_URL;
+  const ssl = nodeEnv !== 'development' ? { rejectUnauthorized: false } : false;
 
-  const client = new Client({ connectionString });
+  const client = new Client({ connectionString, ssl });
   await client.connect();
 
   let result;
