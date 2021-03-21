@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS season(
 
 CREATE TABLE IF NOT EXISTS episodes(
     id serial primary key,
-     name varchar(128) not null,
+     name varchar(256) not null,
      episodeNo integer not null check ( episodeNo > 0),
      aired date,
      overview varchar (1024),

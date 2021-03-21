@@ -35,6 +35,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors)
 app.use(auth);
 app.use('/', indexRoute);
+app.use(cors);
 
 const path = dirname(fileURLToPath(import.meta.url));
 

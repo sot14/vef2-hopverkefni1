@@ -35,7 +35,9 @@ import {
 } from '../api/seasons.js';
 
 import {
-    listEpisode
+    listEpisode,
+    createEpisode,
+    deleteEpisode
 } from '../api/episodes.js';
 
 function indexRoute(req, res) {
@@ -131,6 +133,8 @@ router.get('/tv/:id/season', catchErrors(listSeasons));
 router.get('/tv/:serieNumber/season/:seasonNumber', catchErrors(listSeason));
 
 router.get('/tv/:serieNumber/season/:seasonNumber/episode/:episodeNumber', catchErrors(listEpisode));
+router.post('/tv/:serieNumber/season/:seasonNumber/episode', requireAdmin, catchErrors(createEpisode));
+router.delete('/tv/:serieNumber/season/:seasonNumber/episode/:episodeNumber', catchErrors(deleteEpisode));
 
 router.get('/genres', catchErrors(listGenres));
 router.post('/genres', requireAdmin, catchErrors(addGenre));

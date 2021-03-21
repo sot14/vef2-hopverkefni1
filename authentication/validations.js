@@ -17,8 +17,8 @@ export function isBoolean(b) {
 // validation fyrir date
 export async function isDate(date) {
   var temp = date.split('-');
-  var d = new Date(temp[0] + '-' + temp[1] + '-' + temp[2]);
-  return(d && d.getFullYear()== Number(temp[0]) && d.getMonth() + 1) == temp[1] && d.getDate() == Number(temp[2]);
+  var d = new Date(temp[2] + '-' + temp[0] + '-' + temp[1]);
+  return (d && (d.getMonth() + 1) == temp[0] && d.getDate() == Number(temp[1]) && d.getFullYear() == Number(temp[2]));
 }
 
 export function lengthValidationError(s, min, max) {
