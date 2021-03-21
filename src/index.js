@@ -34,6 +34,10 @@ import {
     listSeason
 } from '../api/seasons.js';
 
+import {
+    listEpisode
+} from '../api/episodes.js';
+
 function indexRoute(req, res) {
     return res.json({
         tv: {
@@ -125,6 +129,8 @@ router.get('/tv/:id', catchErrors(listSerie));
 
 router.get('/tv/:id/season', catchErrors(listSeasons));
 router.get('/tv/:serieNumber/season/:seasonNumber', catchErrors(listSeason));
+
+router.get('/tv/:serieNumber/season/:seasonNumber/episode/:episodeNumber', catchErrors(listEpisode));
 
 router.get('/genres', catchErrors(listGenres));
 router.post('/genres', requireAdmin, catchErrors(addGenre));

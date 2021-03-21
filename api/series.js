@@ -119,7 +119,6 @@ export async function createSeries(req, res, next) {
 // Birtir upplýsingar um stakan sjónvarpsþátt
 export async function listSerie(req, res) {
   const { id } = req.params;
-  currentSerieID = id;
   console.log('serie req params', req.params);
   const serie = await findSerie(id);
   const genre = await findGenre(id);

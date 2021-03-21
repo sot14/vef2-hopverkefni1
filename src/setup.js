@@ -61,9 +61,13 @@ async function main () {
     // Kom ekki inn á réttum tíma þrátt fyrir await svo þurfti að nota settimeout
     setTimeout(async () => {
         await insertSeries(series); //inserts series and genres
-        await insertSeasons(seasons);
-        await insertEpisodes(episodes);
-    }, 2000);
+        setTimeout(async () => {
+            await insertSeasons(seasons);
+            setTimeout(async() => {
+                await insertEpisodes(episodes)
+            }, 10000);
+        },3000);
+    }, 3000);
     
 
     // episodes::
@@ -120,6 +124,7 @@ async function insertSeries(series) {
             serie.network,
             serie.homepage
         ];
+
         try {
             query(queryString, values);
         } catch(e) {
