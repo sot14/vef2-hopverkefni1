@@ -32,7 +32,7 @@ function cors(req, res, next) {
   }
 // Sér um að req.body innihaldi gögn úr formi
 app.use(express.urlencoded({ extended: true }));
-
+app.use(cors)
 app.use(auth);
 app.use('/', indexRoute);
 
