@@ -83,9 +83,9 @@ export async function updateUserRoute(req, res) {
 }
 
 export async function currentUserRoute(req, res) {
-    const { user: { id } = {} } = req;
+    const { userId } = req.user;
 
-    const user = await findById(id);
+    const user = await findById(userId);
 
     if (!user) {
         return res.status(404).json({ error: 'User not found' });

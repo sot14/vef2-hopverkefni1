@@ -135,12 +135,16 @@ export async function createSeries(req, res, next) {
     });
   }
 
+  const maxId = await query(`SELECT MAX(id) FROM series`, []);
+  const id = maxId.rows[0].max + 1;
+  console.log(id);
   const q = `
-  INSERT INTO series(name, aired, inProduction, tagline, thumbnail, description, language, network, url) 
-  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+  INSERT INTO series(id, name, aired, inProduction, tagline, thumbnail, description, language, network, url) 
+  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
         RETURNING *`;
 
   const values = [
+    xss(id),
     xss(serie.name),
     xss(serie.aired),
     xss(serie.inProduction),
@@ -151,6 +155,7 @@ export async function createSeries(req, res, next) {
     xss(serie.network),
     xss(serie.url),
   ];
+  console.log('inserting serie');
   const result = await query(q, values);
   return res.json(result.rows[0]);
 }
