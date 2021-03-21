@@ -1,4 +1,4 @@
-import { uploadImagesFromDisk } from './images.js';
+import { uploadImagesFromDisk, uploadImageIfNotUploaded } from './images.js';
 import { readDataFromCSV } from './tv.js';
 import { query } from './db.js';
 import dotenv from 'dotenv';
@@ -27,7 +27,6 @@ async function main () {
     //     console.error('Villa við að senda myndir', e);
     // }
 
-    // console.log(images);
 
      // henda töflum
     try {
@@ -73,9 +72,9 @@ async function main () {
             await insertSeasons(seasons);
             setTimeout(async() => {
                 await insertEpisodes(episodes)
-            }, 10000);
+            }, 20000);
         },3000);
-    }, 3000);
+    }, 3500);
     
 
     // episodes::
@@ -113,10 +112,10 @@ async function main () {
 async function insertSeries(series) {
     console.log('setting up series', series.length);
     let TVGenres = [];
-    series.forEach((serie) => { 
+    series.forEach(async(serie) => { 
         // let cloudImage;
         // console.log(images.some(item => item.))
-        
+        const image = await uploadImageIfNotUploaded(`${imageFolder}/${serie.image}`);
         let result = [];
         const queryString = 'INSERT INTO series(id, name, aired, inProduction, tagline, thumbnail, description, language, network, url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)';
         
@@ -126,13 +125,13 @@ async function insertSeries(series) {
             serie.airDate,
             serie.inProduction,
             serie.tagline || null,
-            serie.image, 
+            image || serie.image, 
             serie.description,
             serie.language,
             serie.network,
             serie.homepage
         ];
-
+        
         try {
             query(queryString, values);
         } catch(e) {
@@ -193,8 +192,9 @@ async function insertSeries(series) {
 async function insertSeasons(seasons) {
     console.log('inserting seasons', seasons.length);
 
-    seasons.forEach((season) => {
+    seasons.forEach(async(season) => {
     
+        const image = await uploadImageIfNotUploaded(`${imageFolder}/${season.poster}`);
         const queryString = `INSERT INTO season(name, seasonNo, aired, overview, seasonPoster, serieName, FK_serie) VALUES ($1, $2, $3, $4, $5, $6, $7);`;
         
         const values = [
@@ -202,7 +202,7 @@ async function insertSeasons(seasons) {
             season.number,
             season.airDate,
             season.overview || null,
-            season.poster || null,
+            image || season.poster,
             season.serie,
             season.serieId
         ];

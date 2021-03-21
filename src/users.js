@@ -73,7 +73,7 @@ export async function updateUserRoute(req, res) {
     const q = `
       UPDATE
         users
-      SET admin = $1, 
+      SET admin = $1
       WHERE id = $2
       RETURNING
        id, username,password, email, admin `;

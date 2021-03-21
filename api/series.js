@@ -1,17 +1,14 @@
 import xss from 'xss';
 import bcrypt from 'bcrypt';
-import { addPageMetadata, catchErrors } from '../src/utils.js';
+import { addPageMetadata } from '../src/utils.js';
 import { query, pagedQuery, conditionalUpdate } from '../src/db.js';
-import express from 'express';
 import { requireAuth, checkUserIsAdmin } from '../authentication/registered.js';
-import { listSeason, listSeasons } from './seasons.js';
+import { uploadImageIfNotUploaded } from '../src/images.js';
 
 const requireAdmin = [
   requireAuth,
   checkUserIsAdmin,
 ];
-
-export const router = express.Router();
 
 import {
   isInt,
@@ -20,6 +17,7 @@ import {
   isString,
   isBoolean,
   isDate,
+  validateImageMimetype
 } from '../authentication/validations.js'
 
 // Birtir upplýsingar um allar sjónvarpsþáttaseríur
@@ -126,13 +124,52 @@ async function validateSerie({ name, aired, inProduction, tagline, thumbnail, de
 export async function createSeries(req, res, next) {
 
   const { name, aired, inProduction, tagline, thumbnail, description, language, network, url } = req.body;
+
+  const { file: { path, mimetype } = {} } = req;
+  const hasImage = Boolean(path && mimetype);
+
   const serie = { name, aired, inProduction, tagline, thumbnail, description, language, network, url };
   const validations = await validateSerie(serie);
+
+  if (hasImage) {
+    if (!validateImageMimetype(mimetype)) {
+      validations.push({
+        field: 'image',
+        error: `Mimetype ${mimetype} is not legal. ` +
+               `Only ${MIMETYPES.join(', ')} are accepted`,
+      });
+    }
+  }
 
   if (validations.length > 0) {
     return res.status(400).json({
       errors: validations,
     });
+  }
+
+  if (hasImage) {
+    let upload = null;
+    try {
+      upload = await uploadImageIfNotUploaded(path);
+    } catch (error) {
+      // Skilum áfram villu frá Cloudinary, ef einhver
+      if (error.http_code && error.http_code === 400) {
+        return res.status(400).json({ errors: [{
+          field: 'image',
+          error: error.message,
+        }] });
+      }
+
+      console.error('Unable to upload file to cloudinary');
+      return next(error);
+    }
+
+    if (upload && upload.secure_url) {
+      serie.thumbnail = upload.secure_url;
+    } else {
+      // Einhverja hluta vegna er ekkert `secure_url`?
+      return next(new Error('Cloudinary upload missing secure_url'));
+    }
   }
 
   const maxId = await query(`SELECT MAX(id) FROM series`, []);
@@ -178,80 +215,83 @@ export async function updateSeries(req, res) {
   const { name, aired, inProduction, tagline, thumbnail, description, language, network, url } = req.body;
   const serie = { name, aired, inProduction, tagline, thumbnail, description, language, network, url };
 
+  const { file: { path, mimetype } = {} } = req;
+  const hasImage = Boolean(path && mimetype);
+  
   const validations = await validateSerie(serie, true, id);
 
-  // ---- FYRIR MYNDIR------
-  // if (hasImage) {
-  //   if (!validateImageMimetype(mimetype)) {
-  //     validations.push({
-  //       field: 'image',
-  //       error: `Mimetype ${mimetype} is not legal. ` +
-  //         `Only ${MIMETYPES.join(', ')} are accepted`,
-  //     });
-  //   }
-  // }
+  if (hasImage) {
+    if (!validateImageMimetype(mimetype)) {
+      validations.push({
+        field: 'image',
+        error: `Mimetype ${mimetype} is not legal. ` +
+          `Only ${MIMETYPES.join(', ')} are accepted`,
+      });
+    }
+  }
 
   if (!validations.length > 0) {
     return res.status(404).json({ error: 'Serie not found' });
   }
-  // ---- FYRIR MYNDIR ------
-  // Aðeins ef allt er löglegt uploadum við mynd
-  // if (hasImage) {
-  //   let upload = null;
-  //   try {
-  //     upload = await cloudinary.uploader.upload(path);
-  //   } catch (error) {
-  //     // Skilum áfram villu frá Cloudinary, ef einhver
-  //     if (error.http_code && error.http_code === 400) {
-  //       return res.status(400).json({ errors: [{
-  //         field: 'image',
-  //         error: error.message,
-  //       }] });
-  //     }
+    
+  if (hasImage) {
+    let upload = null;
+    try {
+      upload = await uploadImageIfNotUploaded(path);
+    } catch (error) {
+      // Skilum áfram villu frá Cloudinary, ef einhver
+      if (error.http_code && error.http_code === 400) {
+        return res.status(400).json({ errors: [{
+          field: 'image',
+          error: error.message,
+        }] });
+      }
 
-  //     console.error('Unable to upload file to cloudinary');
-  //     return next(error);
-  //   }
+      console.error('Unable to upload file to cloudinary');
+      return next(error);
+    }
 
-  //   if (upload && upload.secure_url) {
-  //     product.image = upload.secure_url;
-  //   } else {
-  //     // Einhverja hluta vegna er ekkert `secure_url`?
-  //     return next(new Error('Cloudinary upload missing secure_url'));
-  //   }
-  // }
-  const fields = [
-    isString(serie.name) ? 'name' : null,
-    isString(serie.aired) ? 'aired' : null,
-    isString(serie.inProduction) ? 'inProduction' : null,
-    isString(serie.tagline) ? 'tagline' : null,
-    isString(serie.thumbnail) ? 'thumbnail' : null,
-    isString(serie.description) ? 'description' : null,
-    isString(serie.language) ? 'language' : null,
-    isString(serie.network) ? 'network' : null,
-    isString(serie.url) ? 'url' : null,
-  ];
-
-  const values = [
-    isString(serie.name) ? xss(serie.title) : null,
-    isString(serie.aired) ? xss(serie.price) : null,
-    isString(serie.inProduction) ? xss(serie.inProduction) : null,
-    isString(serie.tagline) ? xss(serie.tagline) : null,
-    isString(serie.thumbnail) ? xss(serie.thumbnail) : null,
-    isString(serie.description) ? xss(serie.description) : null,
-    isString(serie.language) ? xss(serie.language) : null,
-    isString(serie.network) ? xss(serie.network) : null,
-    isString(serie.url) ? xss(serie.url) : null,
-  ];
-
-  if (!fields.filter(Boolean).length === 0) {
-    return res.status(400).json({ error: 'Nothing to update' });
+    if (upload && upload.secure_url) {
+      serie.thumbnail = upload.secure_url;
+    } else {
+      // Einhverja hluta vegna er ekkert `secure_url`?
+      return next(new Error('Cloudinary upload missing secure_url'));
+    }
   }
 
-  fields.push('updated');
-
-  const result = await conditionalUpdate('series', id, fields, values);
-  return res.status(201).json(result.rows[0]);
+    const fields = [
+      isString(serie.name) ? 'name' : null,
+      isString(serie.aired) ? 'price' : null,
+      isString(serie.inProduction) ? 'inProduction' : null,
+      isString(serie.tagline) ? 'tagline' : null,
+      isString(serie.thumbnail) ? 'thumbnail' : null,
+      isString(serie.description) ? 'description' : null,
+      isString(serie.language) ? 'language' : null,
+      isString(serie.network) ? 'network' : null,
+      isString(serie.url) ? 'url' : null,
+    ];
+    
+    const values = [
+      isString(serie.name) ? xss(serie.title) : null,
+      isString(serie.aired) ? xss(serie.price) : null,
+      isString(serie.inProduction) ? xss(serie.inProduction) : null,
+      isString(serie.tagline) ? xss(serie.tagline) : null,
+      isString(serie.thumbnail) ? xss(serie.thumbnail) : null,
+      isString(serie.description) ? xss(serie.description) : null,
+      isString(serie.language) ? xss(serie.language) : null,
+      isString(serie.network) ? xss(serie.network) : null,
+      isString(serie.url) ? xss(serie.url) : null,
+    ];
+  
+    if (!fields.filter(Boolean).length === 0) {
+      return res.status(400).json({ error: 'Nothing to update' });
+    }
+  
+    fields.push('updated');
+    values.push(new Date());
+  
+    const result = await conditionalUpdate('series', id, fields, values);
+    return res.status(201).json(result.rows[0]);
 }
 // Finnur fjölda einkunna og meðaleinkunn
 async function getStats(id) {

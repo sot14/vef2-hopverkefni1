@@ -1,3 +1,8 @@
+const MIMETYPES = [
+  'image/jpeg',
+  'image/png',
+  'image/gif',
+];
 
 export function isEmpty(s) {
   return s != null && !s;
@@ -53,4 +58,8 @@ export function toPositiveNumberOrDefault(value, defaultValue) {
   const clean = Number.isInteger(cast) && cast > 0 ? cast : defaultValue;
 
   return clean;
+}
+
+export function validateImageMimetype(mimetype) {
+  return MIMETYPES.indexOf(mimetype.toLowerCase()) >= 0;
 }
