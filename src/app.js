@@ -29,7 +29,7 @@ function cors(req, res, next) {
     'Origin, X-Requested-With, Content-Type, Accept, Authorization',
   );
   next();
-
+  }
 // Sér um að req.body innihaldi gögn úr formi
 app.use(express.urlencoded({ extended: true }));
 
