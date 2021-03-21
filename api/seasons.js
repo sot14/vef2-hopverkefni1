@@ -2,6 +2,7 @@ import { pagedQuery, query } from '../src/db.js';
 import { addPageMetadata, catchErrors } from '../src/utils.js';
 import express from 'express';
 import { isInt } from '../authentication/validations.js';
+import { findSeasonInfo } from './series.js';
 
 export const router = express.Router();
 
@@ -64,13 +65,96 @@ export async function listSeason(req, res) {
   return res.json({ seasonItems, episodes });
 }
 
-// Býr til nýtt í season í sjónvarpþætti, aðeins ef notandi er stjórnandi
+async function validateSeason({ name, seasonNo, aired, overview, seasonPoster, serieName } = {},
+  id = null,
+) {
+  const validation = [];
+
+  if (name || isEmpty(name)) {
+    if (!isNotEmptyString(name, { min: 1, max: 256 })) {
+      validation.push({
+        field: 'name',
+        error: lengthValidationError(name, 1, 256),
+      });
+    }
+
+    // check if season name exists in season
+    const seasonExists = await query(
+      'SELECT id FROM season WHERE name = $1 AND FK_serie=$2 AND seasonNumber=$3',
+      [name, serieNumber, seasonNumber],
+    );
+
+    if (seasonExists.rows.length > 0) {
+      const current = seasonExists.rows[0].id;
+
+      if (id && current === toPositiveNumberOrDefault(id, 0)) {
+        // we can patch our own name
+      } else {
+        const error = `season name already exists in season with id ${current}.`;
+        validation.push({
+          field: 'name',
+          error,
+        });
+      }
+    }
+  }
+  // validate season number
+  if (seasonNo || isEmpty(seasonNo)) {
+    if (toPositiveNumberOrDefault(episodeNo, 0) <= 0) {
+      validation.push({
+        field: 'seasonNo',
+        error: 'Season number must be a positive integer',
+      });
+    }
+  }
+  if (aired) {
+    if (!isDate(aired)) {
+      validation.push({
+        field: 'aired',
+        error: 'Air date must be in format yyyy-mm-dd'
+      })
+    }
+  }
+  if (overview) {
+    if (!isString(overview)) {
+      validation.push({
+        field: 'overview',
+        error: 'Overview must be in a string format',
+      });
+    }
+  }
+  if (seasonPoster) {
+    if (!isNotEmptyString(seasonPoster, { min: 1, max: 256 })) {
+      validation.push({
+        field: 'seasonPoster',
+        error: 'seasonPoster path must be between 1 and 256 characters'
+      });
+    }
+  }
+  if (serieName) {
+    if (!isString(serieName)) {
+      validation.push({
+        field: 'serieName',
+        error: 'Input must be a string'
+      })
+    }
+  }
+  return validation;
+}
 
 export async function createSeason(req, res, next) {
+  const { serieNumber } = req.params;
+  const serie = await query(
+    `SELECT * FROM serie
+      WHERE id=$1`,
+    [serieNumber]);
+  if (!season) {
+    return res.status(404).json({ error: 'Serie not found. Not possible to create a season in a non-existing serie.' })
+  }
 
   const { name, seasonNo, aired, overview, seasonPoster, serieName } = req.body;
   const season = { name, seasonNo, aired, overview, seasonPoster, serieName };
-  const validations = await validateSerie(season);
+  const validations = await validateSeason(season);
 
   if (validations.length > 0) {
     return res.status(400).json({
@@ -79,7 +163,7 @@ export async function createSeason(req, res, next) {
   }
 
   const q = `
-  INSERT INTO series(name, seasonNo, aired, overview, seasonPoster, serieName) 
+  INSERT INTO season(name, seasonNo, aired, overview, seasonPoster, serieName) 
   VALUES ($1, $2, $3, $4, $5, $6)
         RETURNING *`;
 
@@ -93,4 +177,16 @@ export async function createSeason(req, res, next) {
   ];
   const result = await query(q, values);
   return res.json(result.rows[0]);
+}
+export async function deleteSeason(req, res) {
+  const { serieNumber, seasonNumber } = req.params;
+
+  const season = await findSeasonInfo(seasonNumber);
+
+  if (!season) {
+    return res.status(404).json({ error: 'Season not found' });
+  }
+  const q = 'DELETE FROM season WHERE serieName = $1 AND FK_serie=$2'
+  await query(q, [serieNumber,seasonNumber]);
+  return res.status(204).json({});
 }
