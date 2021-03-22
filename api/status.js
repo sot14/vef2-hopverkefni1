@@ -180,11 +180,11 @@ async function validateState(state) {
   }
   
   export async function deleteRating(req, res) {
-    const { id } = req.params;
-    const user = req.user.id;
+    const { serieNumber } = req.params;
+    const {id} = req.user.id;
   
     const q = 'DELETE FROM users_series WHERE FK_serie = $1 AND FK_user = $2'
-    await query(q, [id, user]);
+    await query(q, [serieNumber, id]);
     return res.status(204).json({});
   }
   
