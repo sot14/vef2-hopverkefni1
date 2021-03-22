@@ -69,7 +69,6 @@ passport.use(new Strategy(jwtOptions, strat));
 app.use(passport.initialize());
 
 export function requireAuth(req, res, next) {
-  console.log("authenticating");
   return passport.authenticate('jwt', { session: false },
     (err, user, info) => {
       if (err) {

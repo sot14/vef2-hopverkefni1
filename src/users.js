@@ -83,7 +83,9 @@ export async function updateUserRoute(req, res) {
 }
 
 export async function currentUserRoute(req, res) {
-    const { user: { id } = {} } = req;
+    console.log('users me');
+    const { id } = req.user;
+    console.log(id);
 
     const user = await findById(id);
   
