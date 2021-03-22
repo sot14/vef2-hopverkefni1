@@ -51,19 +51,19 @@ CREATE TABLE IF NOT EXISTS episodes(
 CREATE TABLE IF NOT EXISTS users(
   id serial primary key,
   username character varying(255) NOT NULL unique,
-  password character varying(255) NOT NULL unique, 
+  password character varying(255) NOT NULL, 
   email varchar(255) NOT NULL unique,
   admin boolean default false
 );
 
 CREATE TABLE IF NOT EXISTS users_series(
   id serial primary key,
-  FK_serie serial,
-  FK_user serial,
-  CONSTRAINT FK_serie FOREIGN KEY (id) REFERENCES series(id) ON DELETE CASCADE,
-  CONSTRAINT FK_user FOREIGN KEY (id) REFERENCES users(id) ON DELETE CASCADE,
   state varchar(64),
-  rating INTEGER CHECK(rating < 6)
+  rating integer CHECK(rating < 6),
+  FK_serie integer,
+  FK_user integer,
+  CONSTRAINT FK_serie FOREIGN KEY (id) REFERENCES series(id) ON DELETE CASCADE,
+  CONSTRAINT FK_user FOREIGN KEY (id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 

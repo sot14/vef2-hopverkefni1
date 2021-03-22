@@ -157,8 +157,7 @@ async function insertSeasons(seasons) {
 async function insertEpisodes(episodes) {
     console.log('inserting episodes', episodes.length);
     episodes.forEach(async(episode) => {
-        setTimeout(async() => {
-            const queryString = `INSERT INTO episodes(name, episodeNo, aired, overview, seasonNumber, FK_serie) VALUES ($1, $2, $3, $4, $5, $6);`;
+        const queryString = `INSERT INTO episodes(name, episodeNo, aired, overview, seasonNumber, FK_serie) VALUES ($1, $2, $3, $4, $5, $6);`;
         
         const values = [
             episode.name,
@@ -173,7 +172,6 @@ async function insertEpisodes(episodes) {
         } catch (e) {
             console.error('Villa við að inserta episodes', e);
         }
-        }, 50);
         
     });
 }

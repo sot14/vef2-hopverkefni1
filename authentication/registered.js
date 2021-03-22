@@ -69,6 +69,7 @@ passport.use(new Strategy(jwtOptions, strat));
 app.use(passport.initialize());
 
 export function requireAuth(req, res, next) {
+  console.log("authenticating");
   return passport.authenticate('jwt', { session: false },
     (err, user, info) => {
       if (err) {
@@ -81,11 +82,12 @@ export function requireAuth(req, res, next) {
 
         return res.status(401).json({ error });
       }
-      console.log("userrrrrrr: ",user)
+      console.log("user: ",user)
       req.user = user;
-      return next(req.user);
+      return next();
     })
     (req, res, next);
+
 }
 
 export function checkUserIsAdmin(req, res, next) {

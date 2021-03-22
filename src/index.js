@@ -145,24 +145,24 @@ router.get('/tv/:id', catchErrors(listSerie));
 router.delete('/tv/:id', requireAdmin, catchErrors(deleteSeries));
 router.patch('/tv/:id', requireAdmin, catchErrors(updateSeries));
 // Routes fyrir series rating
-router.post('/tv/:id/rate',requireAuth,catchErrors(rateSerie));
+router.post('/tv/:serieNumber/rate',requireAuth,catchErrors(rateSerie));
 router.patch('/tv/:id/rate',requireAuth,catchErrors(updateRating));
-router.delete('/tv/:id/rate',catchErrors(deleteRating));
+router.delete('/tv/:id/rate', requireAuth,catchErrors(deleteRating));
 // Routes fyrir series states
 router.post('/tv/:id/state',requireAuth,catchErrors(stateSerie));
 router.patch('/tv/:id/state',requireAuth,catchErrors(updateState));
-router.delete('/tv/:id/state',catchErrors(deleteState));
+router.delete('/tv/:id/state',requireAuth, catchErrors(deleteState));
 
 // Routes fyrir seasons
 router.get('/tv/:id/season', catchErrors(listSeasons));
 router.post('/tv/:serieNumber/season', requireAdmin, catchErrors(createSeason));
 router.get('/tv/:serieNumber/season/:seasonNumber', catchErrors(listSeason));
-router.delete('/tv/:serieNumber/season/:seasonNumber', catchErrors(deleteSeason));
+router.delete('/tv/:serieNumber/season/:seasonNumber', requireAdmin, catchErrors(deleteSeason));
 
 // Routes fyrir episodes
 router.get('/tv/:serieNumber/season/:seasonNumber/episode/:episodeNumber', catchErrors(listEpisode));
 router.post('/tv/:serieNumber/season/:seasonNumber/episode', requireAdmin, catchErrors(createEpisode));
-router.delete('/tv/:serieNumber/season/:seasonNumber/episode/:episodeNumber', catchErrors(deleteEpisode));
+router.delete('/tv/:serieNumber/season/:seasonNumber/episode/:episodeNumber',requireAdmin, catchErrors(deleteEpisode));
 
 // Routes fyrir genres
 router.get('/genres', catchErrors(listGenres));

@@ -3,10 +3,10 @@ INSERT INTO
   users
     (id, username, email, password, admin)
   VALUES
-    (1, 'admin', 'admin@admin.com', '$2b$11$S/0nSIFH6oLalwYB/6XW4u9IIP.IN5oug/K3b.ZF7F4NL1cWyw8R6', true);
+    (1, 'admin', 'admin@admin.com', '$2a$11$pgj3.zySyFOvIQEpD7W6Aund1Tw.BFarXxgLJxLbrzIv/4Nteisii', true); --password: password
 
 INSERT INTO
   users
     (id, username, email, password, admin)
   VALUES
-    (2, 'jennsara', 'jenny@sara.is', '$2b$11$pzXL.B8mMVOEAaGrtNa.KObIhJnpC6VBYsbNzF6F93TIUE/J2WLJ2', false);
+    (2, 'jennsara', 'jenny@sara.is', '$2a$11$pgj3.zySyFOvIQEpD7W6Aund1Tw.BFarXxgLJxLbrzIv/4Nteisii', false); --password: 1234

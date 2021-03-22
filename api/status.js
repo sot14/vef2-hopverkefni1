@@ -1,4 +1,5 @@
-import {conditionalUpdate} from '../src/db.js';
+import {conditionalUpdate, query, pagedQuery} from '../src/db.js';
+import xss from 'xss';
 import {
     isInt,
     isString,
@@ -95,21 +96,24 @@ async function validateState(state) {
   }
 
   async function validateRating(rating) {
-    let validation = [];
+    const validation = [];
   
     if (!isInt(rating)) {
       validation.push({
         field: 'rate',
         error: 'Rating must be an integer,one of 0, 1, 2, 3, 4, 5',
       });
-      return validation
     }
+
+    return validation;
   
   }
   export async function rateSerie(req, res) {
-    const { user } = req.user.id;
-    const { id } = req.params;
+    
+    const { id } = req.user;
+    const { serieNumber } = req.params;
     const { rating } = req.body;
+    console.log('rating serie', rating, serieNumber, id);
     const validation = await validateRating(rating);
   
     if (validation.length > 0) {
@@ -119,15 +123,17 @@ async function validateState(state) {
     }
   
     const q = `
-    INSERT INTO users_series (FK_user,FK_serie,rating) VALUES ($1,$2,$3)
+    INSERT INTO users_series(FK_serie, FK_user, rating) VALUES ($1, $2, $3)
           RETURNING *`;
-  
+
+
     const values = [
-      xss[user],
-      xss[id],
-      xss(rating)
+      serieNumber,
+      id,
+      rating
     ];
     const result = await query(q, values);
+    
     return res.json(result.rows[0]);
   
   }
