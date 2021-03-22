@@ -1,21 +1,17 @@
-import { uploadImagesFromDisk, uploadImageIfNotUploaded } from './images.js';
+import { uploadImagesFromDisk } from './images.js';
 import { readDataFromCSV } from './tv.js';
 import { query } from './db.js';
 import dotenv from 'dotenv';
 import fs from 'fs';
 import util from 'util';
 import csvParser from 'csv-parser';
-
 const readFileAsync = util.promisify(fs.readFile);
-
 const {
     DATABASE_URL: databaseUrl,
     CLOUDINARY_URL: cloudinaryUrl,
-    IMAGE_FOLDER: imageFolder = './data/img',
+    IMAGE_FOLDER: imageFolder = '../data/img',
   } = process.env;
-
 dotenv.config();
-
 async function main () {
     console.info(`Set upp gagnagrunn á ${databaseUrl}`);
     console.info(`Set upp tengingu við Cloudinary á ${cloudinaryUrl}`);
@@ -27,6 +23,7 @@ async function main () {
     //     console.error('Villa við að senda myndir', e);
     // }
 
+    // console.log(images);
 
      // henda töflum
     try {
@@ -37,7 +34,6 @@ async function main () {
         console.error('Villa við að henda töflum:', e.message);
         return;
     }
-
     // búa til töflur út frá skema
     try {
         const createTable = await readFileAsync('../sql/schema.sql');
@@ -47,7 +43,6 @@ async function main () {
         console.error('Villa við að búa til töflu:', e.message);
         return;
     }
-
     // búa til admin og user
     try {
         const createTable = await readFileAsync('../sql/users.sql');
@@ -57,10 +52,8 @@ async function main () {
         console.error('Villa við að búa til notendur:', e.message);
         return;
     }
-
     console.log('gonna read files');
     const series = await readDataFromCSV('../data/series.csv');
-
     const seasons = await readDataFromCSV('../data/seasons.csv');
     
     const episodes = await readDataFromCSV('../data/episodes.csv');
@@ -72,10 +65,10 @@ async function main () {
             await insertSeasons(seasons);
             setTimeout(async() => {
                 await insertEpisodes(episodes)
-            }, 20000);
+            }, 10000);
         },3000);
-    }, 3500);
-    
+    }, 3000);
+
 
     // episodes::
     // name: 'Apple',
@@ -85,7 +78,6 @@ async function main () {
     // season: '1',
     // serie: 'The Good Doctor',
     // serieId: '3'
-
     // series::
     // id: '1',
     // name: 'WandaVision',
@@ -98,7 +90,6 @@ async function main () {
     // language: 'en',
     // network: 'Disney+',
     // homepage: 'https://www.disneyplus.com/series/wandavision/4SrN28ZjDLwH'
-
     // season::
     // name: 'Season 13',
     // number: '13',
@@ -108,40 +99,37 @@ async function main () {
     // serie: 'The Simpsons',
     // serieId: '18'
 }
-
 async function insertSeries(series) {
     console.log('setting up series', series.length);
     let TVGenres = [];
-    series.forEach(async(serie) => { 
+    series.forEach((serie) => { 
         // let cloudImage;
         // console.log(images.some(item => item.))
-        const image = await uploadImageIfNotUploaded(`${imageFolder}/${serie.image}`);
+
         let result = [];
         const queryString = 'INSERT INTO series(id, name, aired, inProduction, tagline, thumbnail, description, language, network, url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)';
-        
+
         const values = [
             serie.id,
             serie.name,
             serie.airDate,
             serie.inProduction,
             serie.tagline || null,
-            image || serie.image, 
+            serie.image, 
             serie.description,
             serie.language,
             serie.network,
             serie.homepage
         ];
-        
+
         try {
             query(queryString, values);
         } catch(e) {
             console.error('villa við að inserta series', e);
         }
-
         let currentGenres = serie.genres;
         currentGenres = currentGenres.split(',');
         currentGenres.forEach(async (genre) => {
-
            
             // find unique genres
             if(!TVGenres.includes(genre)) {
@@ -150,19 +138,15 @@ async function insertSeries(series) {
         });
         
     });
-
     TVGenres.forEach((genre) => {
         const queryString = `INSERT INTO genres(name) VALUES ($1);`;
         const values = [genre];
-
         try {
             query(queryString, values);
         } catch(e) {
             console.error('villa við að inserta genres', e);
         }
-
     });
-
     await series.forEach(async(serie) => {
         console.log('inserting seriegenres');
         const serieGenres = serie.genres.split(',');
@@ -171,7 +155,6 @@ async function insertSeries(series) {
             console.log(serieGenre);
             
             const genreQuery = 'INSERT INTO series_genres(serie, genre) VALUES($1, $2)';
-
             const genreValues = [
                 serie.id,
                 serieGenre
@@ -188,21 +171,19 @@ async function insertSeries(series) {
     })
         
 }
-
 async function insertSeasons(seasons) {
     console.log('inserting seasons', seasons.length);
 
-    seasons.forEach(async(season) => {
-    
-        const image = await uploadImageIfNotUploaded(`${imageFolder}/${season.poster}`);
+    seasons.forEach((season) => {
+
         const queryString = `INSERT INTO season(name, seasonNo, aired, overview, seasonPoster, serieName, FK_serie) VALUES ($1, $2, $3, $4, $5, $6, $7);`;
-        
+
         const values = [
             season.name,
             season.number,
             season.airDate,
             season.overview || null,
-            image || season.poster,
+            season.poster || null,
             season.serie,
             season.serieId
         ];
@@ -213,7 +194,6 @@ async function insertSeasons(seasons) {
         }
     });
 }
-
 async function insertEpisodes(episodes) {
     console.log('inserting episodes', episodes.length);
     episodes.forEach((episode) => {

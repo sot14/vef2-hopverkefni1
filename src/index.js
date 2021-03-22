@@ -25,9 +25,6 @@ import {
     createSeries,
     updateSeries,
     deleteSeries,
-    rateSerie,
-    updateRating,
-    deleteRating,
 } from '../api/series.js'
 
 import {
@@ -46,6 +43,15 @@ import {
     createEpisode,
     deleteEpisode
 } from '../api/episodes.js';
+
+import {
+    rateSerie,
+    updateRating,
+    deleteRating,
+    stateSerie,
+    updateState,
+    deleteState
+} from '../api/status.js'
 
 function indexRoute(req, res) {
     return res.json({
@@ -138,9 +144,14 @@ router.post('/tv', requireAdmin, catchErrors(createSeries));
 router.get('/tv/:id', catchErrors(listSerie));
 router.delete('/tv/:id', requireAdmin, catchErrors(deleteSeries));
 router.patch('/tv/:id', requireAdmin, catchErrors(updateSeries));
-router.get('/tv/:id/rate',requireAuth,catchErrors(rateSerie));
+// Routes fyrir series rating
+router.post('/tv/:id/rate',requireAuth,catchErrors(rateSerie));
 router.patch('/tv/:id/rate',requireAuth,catchErrors(updateRating));
 router.delete('/tv/:id/rate',catchErrors(deleteRating));
+// Routes fyrir series states
+router.post('/tv/:id/state',requireAuth,catchErrors(stateSerie));
+router.patch('/tv/:id/state',requireAuth,catchErrors(updateState));
+router.delete('/tv/:id/state',catchErrors(deleteState));
 
 // Routes fyrir seasons
 router.get('/tv/:id/season', catchErrors(listSeasons));
