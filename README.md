@@ -29,7 +29,7 @@ admin hefur réttindi stjórnanda en jennsara er venjulegur notandi.
 
 Hægt er að senda beiðnir skv. forskrift á öll route skilgreind í index.js
 
-T.d. skilar POST request sem admin með body-inu {"username":"admin", "password":"123"}:
+T.d. skilar POST request á '/users/login' með body-inu {"username":"admin", "password":"123"}:
 ```
 {
     "user": {
@@ -44,7 +44,7 @@ T.d. skilar POST request sem admin með body-inu {"username":"admin", "password"
 ```
 Í Postman er hægt að setja gildi token sem Type: Bearer token í Auth flipanum til að geta sent beiðnir sem admin.
 
-Þá er t.d. hægt að senda POST request á /tv með body 
+Þá er t.d. hægt að senda POST request sem admin á '/tv' með body 
 
 { "name":"testSerie", "aired":"2000-12-12", "inProduction":true, "tagline":"test tagline", "thumbnail":"nice.jpg", "description":"test description", "language":"is", "network":"blablanetwork", "url":"bla.is"} 
 
