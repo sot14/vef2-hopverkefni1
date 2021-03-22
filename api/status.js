@@ -1,4 +1,4 @@
-
+import {conditionalUpdate} from '../src/db.js';
 import {
     isInt,
     isString,
@@ -18,7 +18,7 @@ async function validateState(state) {
   }
   export async function stateSerie(req, res) {
     const { user } = req.user.id;
-    const { FK_serie } = req.params;
+    const { id } = req.params;
     const { state } = req.body;
     const validation = await validateState(state);
   
@@ -34,7 +34,7 @@ async function validateState(state) {
   
     const values = [
       xss[user],
-      xss[FK_serie],
+      xss[id],
       xss(state)
     ];
     const result = await query(q, values);
@@ -44,9 +44,9 @@ async function validateState(state) {
   
   export async function updateState(req, res) {
     const { user } = requireAuth;
-    const { FK_serie } = req.params;
+    const { id } = req.params;
     const { state } = req.body;
-    const stateInfo = { user, FK_serie, state };
+    const stateInfo = { user, id, state };
   
     const validations = await validateState(stateInfo);
   
@@ -56,13 +56,13 @@ async function validateState(state) {
   
     const fields = [
       isInt(stateInfo.FK_user) ? 'FK_user' : null,
-      isString(stateInfo.FK_serie) ? 'FK_serie' : null,
+      isString(stateInfo.id) ? 'id' : null,
       isString(stateInfo.state) ? 'state' : null,
     ];
   
     const values = [
       isInt(stateInfo.FK_user) ? xss(stateInfo.FK_user) : null,
-      isInt(stateInfo.FK_serie) ? xss(stateInfo.FK_serie) : null,
+      isInt(stateInfo.id) ? xss(stateInfo.id) : null,
       isInt(stateInfo.state) ? xss(stateInfo.state) : null,
     ];
   
