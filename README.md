@@ -23,12 +23,13 @@ password: 123
 username: jennsara
 password: 123
 ```
+admin hefur réttindi stjórnanda en jennsara er venjulegur notandi.
 
 # Vefþjónustur
 
 Hægt er að senda beiðnir skv. forskrift á öll route skilgreind í index.js
 
-T.d. skilar POST beiðni með {"username":"admin", "password":"123"} í body:
+T.d. skilar POST request með body-inu {"username":"admin", "password":"123"}:
 ```
 {
     "user": {
