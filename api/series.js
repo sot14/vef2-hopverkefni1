@@ -29,11 +29,13 @@ export async function listSeries(req, res) {
     [],
     { offset, limit },
   );
+
   const seriesWithPage = addPageMetadata(
     series,
     req.path,
     { offset, limit, length: series.items.length },
   );
+ 
   return res.json(seriesWithPage);
 }
 
@@ -136,7 +138,7 @@ export async function createSeries(req, res, next) {
       validations.push({
         field: 'image',
         error: `Mimetype ${mimetype} is not legal. ` +
-               `Only ${MIMETYPES.join(', ')} are accepted`,
+          `Only ${MIMETYPES.join(', ')} are accepted`,
       });
     }
   }
@@ -154,10 +156,12 @@ export async function createSeries(req, res, next) {
     } catch (error) {
       // Skilum áfram villu frá Cloudinary, ef einhver
       if (error.http_code && error.http_code === 400) {
-        return res.status(400).json({ errors: [{
-          field: 'image',
-          error: error.message,
-        }] });
+        return res.status(400).json({
+          errors: [{
+            field: 'image',
+            error: error.message,
+          }]
+        });
       }
 
       console.error('Unable to upload file to cloudinary');
@@ -217,7 +221,7 @@ export async function updateSeries(req, res) {
 
   const { file: { path, mimetype } = {} } = req;
   const hasImage = Boolean(path && mimetype);
-  
+
   const validations = await validateSerie(serie, true, id);
 
   if (hasImage) {
@@ -233,7 +237,7 @@ export async function updateSeries(req, res) {
   if (!validations.length > 0) {
     return res.status(404).json({ error: 'Serie not found' });
   }
-    
+
   if (hasImage) {
     let upload = null;
     try {
@@ -241,10 +245,12 @@ export async function updateSeries(req, res) {
     } catch (error) {
       // Skilum áfram villu frá Cloudinary, ef einhver
       if (error.http_code && error.http_code === 400) {
-        return res.status(400).json({ errors: [{
-          field: 'image',
-          error: error.message,
-        }] });
+        return res.status(400).json({
+          errors: [{
+            field: 'image',
+            error: error.message,
+          }]
+        });
       }
 
       console.error('Unable to upload file to cloudinary');
@@ -259,39 +265,39 @@ export async function updateSeries(req, res) {
     }
   }
 
-    const fields = [
-      isString(serie.name) ? 'name' : null,
-      isString(serie.aired) ? 'price' : null,
-      isString(serie.inProduction) ? 'inProduction' : null,
-      isString(serie.tagline) ? 'tagline' : null,
-      isString(serie.thumbnail) ? 'thumbnail' : null,
-      isString(serie.description) ? 'description' : null,
-      isString(serie.language) ? 'language' : null,
-      isString(serie.network) ? 'network' : null,
-      isString(serie.url) ? 'url' : null,
-    ];
-    
-    const values = [
-      isString(serie.name) ? xss(serie.title) : null,
-      isString(serie.aired) ? xss(serie.price) : null,
-      isString(serie.inProduction) ? xss(serie.inProduction) : null,
-      isString(serie.tagline) ? xss(serie.tagline) : null,
-      isString(serie.thumbnail) ? xss(serie.thumbnail) : null,
-      isString(serie.description) ? xss(serie.description) : null,
-      isString(serie.language) ? xss(serie.language) : null,
-      isString(serie.network) ? xss(serie.network) : null,
-      isString(serie.url) ? xss(serie.url) : null,
-    ];
-  
-    if (!fields.filter(Boolean).length === 0) {
-      return res.status(400).json({ error: 'Nothing to update' });
-    }
-  
-    fields.push('updated');
-    values.push(new Date());
-  
-    const result = await conditionalUpdate('series', id, fields, values);
-    return res.status(201).json(result.rows[0]);
+  const fields = [
+    isString(serie.name) ? 'name' : null,
+    isString(serie.aired) ? 'price' : null,
+    isString(serie.inProduction) ? 'inProduction' : null,
+    isString(serie.tagline) ? 'tagline' : null,
+    isString(serie.thumbnail) ? 'thumbnail' : null,
+    isString(serie.description) ? 'description' : null,
+    isString(serie.language) ? 'language' : null,
+    isString(serie.network) ? 'network' : null,
+    isString(serie.url) ? 'url' : null,
+  ];
+
+  const values = [
+    isString(serie.name) ? xss(serie.title) : null,
+    isString(serie.aired) ? xss(serie.price) : null,
+    isString(serie.inProduction) ? xss(serie.inProduction) : null,
+    isString(serie.tagline) ? xss(serie.tagline) : null,
+    isString(serie.thumbnail) ? xss(serie.thumbnail) : null,
+    isString(serie.description) ? xss(serie.description) : null,
+    isString(serie.language) ? xss(serie.language) : null,
+    isString(serie.network) ? xss(serie.network) : null,
+    isString(serie.url) ? xss(serie.url) : null,
+  ];
+
+  if (!fields.filter(Boolean).length === 0) {
+    return res.status(400).json({ error: 'Nothing to update' });
+  }
+
+  fields.push('updated');
+  values.push(new Date());
+
+  const result = await conditionalUpdate('series', id, fields, values);
+  return res.status(201).json(result.rows[0]);
 }
 // Finnur fjölda einkunna og meðaleinkunn
 async function getStats(id) {
@@ -309,6 +315,7 @@ export async function listSerie(req, res) {
   const serie = await findSerie(id);
   const genre = await findGenre(id);
   const seasonInfo = await findSeasonInfo(id)
+  console.log('id:', id)
 
   if (!serie) {
     return res.status(404).json({ error: 'Serie not found' });
@@ -318,6 +325,10 @@ export async function listSerie(req, res) {
   result.push(genre)
   result.push(seasonInfo)
   result.push(stats)
+
+  if (!requireAuth) {
+    result.push(listRatings)
+  }
   return res.json(result);
 }
 
@@ -369,7 +380,7 @@ export async function findSeasonInfo(id) {
   );
   return season.rows;
 }
-async function validateRating(rating){
+async function validateRating(rating) {
   let validation = [];
 
   if (!isInt(rating)) {
@@ -446,7 +457,15 @@ export async function deleteRating(req, res) {
   const user = req.user.id;
 
   const q = 'DELETE FROM users_series WHERE FK_serie = $1 AND FK_user = $2'
-  await query(q, [id,user]);
+  await query(q, [id, user]);
   return res.status(204).json({});
 }
 
+ async function listRatings(req, res) {
+  const { id } = req.params;
+  const user = req.user.id;
+
+  const q = 'SELECT * FROM users_series WHERE FK_serie = $1 AND FK_user = $2'
+  const result = await query(q, [id, user]);
+  return res.json(result.rows[0]);
+}
