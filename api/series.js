@@ -293,11 +293,19 @@ export async function updateSeries(req, res) {
     const result = await conditionalUpdate('series', id, fields, values);
     return res.status(201).json(result.rows[0]);
 }
+// Finnur fjölda einkunna og meðaleinkunn
+async function getStats(id) {
+  const stats = await query(
+    `SELECT COUNT(*),AVG(rating) from users_series where FK_serie=$1`,
+    [id],
+  );
+  return stats.rows[0];
 
+}
 // Birtir upplýsingar um stakan sjónvarpsþátt
 export async function listSerie(req, res) {
   const { id } = req.params;
-  console.log('serie req params', req.params);
+  const stats = await getStats(id);
   const serie = await findSerie(id);
   const genre = await findGenre(id);
   const seasonInfo = await findSeasonInfo(id)
@@ -309,6 +317,7 @@ export async function listSerie(req, res) {
   result.push(serie)
   result.push(genre)
   result.push(seasonInfo)
+  result.push(stats)
   return res.json(result);
 }
 
@@ -360,3 +369,84 @@ export async function findSeasonInfo(id) {
   );
   return season.rows;
 }
+async function validateRating(rating){
+  let validation = [];
+
+  if (!isInt(rating)) {
+    validation.push({
+      field: 'rate',
+      error: 'Rating must be an integer,one of 0, 1, 2, 3, 4, 5',
+    });
+    return validation
+  }
+
+}
+export async function rateSerie(req, res) {
+  const { user } = req.user.id;
+  const { FK_serie } = req.params;
+  const { rating } = req.body;
+  const validation = await validateRating(rating);
+
+  if (validation.length > 0) {
+    return res.status(400).json({
+      errors: validation,
+    });
+  }
+
+  const q = `
+  INSERT INTO users_series (FK_user,FK_serie,rating) VALUES ($1,$2,$3)
+        RETURNING *`;
+
+  const values = [
+    xss[user],
+    xss[FK_serie],
+    xss(rating)
+  ];
+  const result = await query(q, values);
+  return res.json(result.rows[0]);
+
+}
+
+export async function updateRating(req, res) {
+  const { user } = requireAuth;
+  const { FK_serie } = req.params;
+  const { rating } = req.body;
+  const ratings = { user, FK_serie, rating };
+
+  const validations = await validateRating(ratings);
+
+  if (!validations.length > 0) {
+    return res.status(404).json({ error: 'Serie not found' });
+  }
+
+  const fields = [
+    isInt(ratings.FK_user) ? 'FK_user' : null,
+    isString(ratings.FK_serie) ? 'FK_serie' : null,
+    isString(ratings.rating) ? 'rating' : null,
+  ];
+
+  const values = [
+    isInt(ratings.FK_user) ? xss(ratings.FK_user) : null,
+    isInt(ratings.FK_serie) ? xss(ratings.FK_serie) : null,
+    isInt(ratings.rating) ? xss(ratings.rating) : null,
+  ];
+
+  if (!fields.filter(Boolean).length === 0) {
+    return res.status(400).json({ error: 'Nothing to update' });
+  }
+
+  fields.push('updated');
+
+  const result = await conditionalUpdate('users_series', id, fields, values);
+  return res.status(201).json(result.rows[0]);
+}
+
+export async function deleteRating(req, res) {
+  const { id } = req.params;
+  const user = req.user.id;
+
+  const q = 'DELETE FROM users_series WHERE FK_serie = $1 AND FK_user = $2'
+  await query(q, [id,user]);
+  return res.status(204).json({});
+}
+

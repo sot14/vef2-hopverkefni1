@@ -232,11 +232,11 @@ export async function deleteSeason(req, res) {
   if (!season) {
     return res.status(404).json({ error: 'Season not found' });
   }
-  if(episodes) {
+  if (episodes) {
     const q_ep = 'DELETE FROM episodes WHERE seasonNumber=$1 AND FK_serie=$2';
     await query(q_ep, [seasonNumber, serieNumber]);
   }
-  
+
   const q_season = 'DELETE FROM season WHERE seasonNo = $1 AND FK_serie=$2'
   await query(q_season, [seasonNumber, serieNumber]);
   return res.status(204).json({});

@@ -58,6 +58,8 @@ CREATE TABLE IF NOT EXISTS users(
 
 CREATE TABLE IF NOT EXISTS users_series(
   id serial primary key,
+  FK_serie serial,
+  FK_user serial,
   CONSTRAINT FK_serie FOREIGN KEY (id) REFERENCES series(id) ON DELETE CASCADE,
   CONSTRAINT FK_user FOREIGN KEY (id) REFERENCES users(id) ON DELETE CASCADE,
   state varchar(64),
