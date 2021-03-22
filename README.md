@@ -1,3 +1,5 @@
+Verkefnið keyrir á Heroku: https://nesflix-h1.herokuapp.com/
+
 # Uppsetning
 
 1. Búa til gagnagrunn, t.d. createdb nesflix
