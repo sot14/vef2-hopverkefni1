@@ -5,11 +5,6 @@ import { query, pagedQuery, conditionalUpdate } from '../src/db.js';
 import { requireAuth, checkUserIsAdmin } from '../authentication/registered.js';
 import { uploadImageIfNotUploaded } from '../src/images.js';
 
-const requireAdmin = [
-  requireAuth,
-  checkUserIsAdmin,
-];
-
 import {
   isInt,
   isEmpty,
