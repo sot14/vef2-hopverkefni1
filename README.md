@@ -12,7 +12,7 @@ Tveir notendur eru búnir til í setup:
 
 ```
 username: admin
-password: password
+password: 123
 
 username: jennsara
 password: 1234
