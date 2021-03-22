@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS series(
   inProduction boolean,
   tagline varchar(128),
   thumbnail varchar (255) not null,
-  description varchar (1024),
+  description varchar (2048),
   language varchar (64),
   network varchar (64),
   url varchar (255)
@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS season(
     name varchar(128) not null,
     seasonNo integer not null check ( seasonNo > 0),
     aired date,
-    overview varchar(1024),
+    overview varchar(2048),
     seasonPoster varchar (255),
     serieName varchar(128),
     FK_serie integer not null,
@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS episodes(
      name varchar(256) not null,
      episodeNo integer not null check ( episodeNo > 0),
      aired date,
-     overview varchar (1024),
+     overview varchar (2048),
      seasonNumber integer check (seasonNumber > 0),
      FK_serie serial,
      CONSTRAINT FK_serie FOREIGN KEY (FK_serie) REFERENCES series(id) ON DELETE CASCADE
