@@ -15,7 +15,7 @@ username: admin
 password: 123
 
 username: jennsara
-password: 1234
+password: 123
 ```
 
 # Vefþjónustur
