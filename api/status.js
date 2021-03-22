@@ -6,20 +6,21 @@ import {
   } from '../authentication/validations.js'
 
 async function validateState(state) {
-    let validation = []; 
+    const validation = []; 
   
     if (!isString(state)) {
       validation.push({
         field: 'state',
         error: 'State must be one of the following, Langar að horfa, Er að horfa, Hef horft', 
       });
-      return validation
+     
     }
+    return validation;
   
   }
   export async function stateSerie(req, res) {
-    const { user } = req.user.id;
-    const { id } = req.params;
+    const { id } = req.user.id;
+    const { serieNumber } = req.params;
     const { state } = req.body;
     const validation = await validateState(state);
   
@@ -34,9 +35,9 @@ async function validateState(state) {
           RETURNING *`;
   
     const values = [
-      xss[user],
-      xss[id],
-      xss(state)
+      id,
+      serieNumber,
+      state
     ];
     const result = await query(q, values);
     return res.json(result.rows[0]);

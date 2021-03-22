@@ -149,9 +149,9 @@ router.post('/tv/:serieNumber/rate',requireAuth,catchErrors(rateSerie));
 router.patch('/tv/:serieNumber/rate',requireAuth,catchErrors(updateRating));
 router.delete('/tv/:serieNumber/rate', requireAuth,catchErrors(deleteRating));
 // Routes fyrir series states
-router.post('/tv/:id/state',requireAuth,catchErrors(stateSerie));
-router.patch('/tv/:id/state',requireAuth,catchErrors(updateState));
-router.delete('/tv/:id/state',requireAuth, catchErrors(deleteState));
+router.post('/tv/:serieNumber/state',requireAuth,catchErrors(stateSerie));
+router.patch('/tv/:serieNumber/state',requireAuth,catchErrors(updateState));
+router.delete('/tv/:serieNumber/state',requireAuth, catchErrors(deleteState));
 
 // Routes fyrir seasons
 router.get('/tv/:id/season', catchErrors(listSeasons));
