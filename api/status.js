@@ -108,7 +108,7 @@ async function validateState(state) {
   }
   export async function rateSerie(req, res) {
     const { user } = req.user.id;
-    const { FK_serie } = req.params;
+    const { id } = req.params;
     const { rating } = req.body;
     const validation = await validateRating(rating);
   
@@ -124,7 +124,7 @@ async function validateState(state) {
   
     const values = [
       xss[user],
-      xss[FK_serie],
+      xss[id],
       xss(rating)
     ];
     const result = await query(q, values);
@@ -134,9 +134,9 @@ async function validateState(state) {
   
   export async function updateRating(req, res) {
     const { user } = requireAuth;
-    const { FK_serie } = req.params;
+    const { id } = req.params;
     const { rating } = req.body;
-    const ratings = { user, FK_serie, rating };
+    const ratings = { user, id, rating };
   
     const validations = await validateRating(ratings);
   
@@ -146,13 +146,13 @@ async function validateState(state) {
   
     const fields = [
       isInt(ratings.FK_user) ? 'FK_user' : null,
-      isString(ratings.FK_serie) ? 'FK_serie' : null,
+      isString(ratings.id) ? 'id' : null,
       isString(ratings.rating) ? 'rating' : null,
     ];
   
     const values = [
       isInt(ratings.FK_user) ? xss(ratings.FK_user) : null,
-      isInt(ratings.FK_serie) ? xss(ratings.FK_serie) : null,
+      isInt(ratings.id) ? xss(ratings.id) : null,
       isInt(ratings.rating) ? xss(ratings.rating) : null,
     ];
   
