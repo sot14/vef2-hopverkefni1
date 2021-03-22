@@ -15,8 +15,8 @@ dotenv.config();
 
 
 const {
-  PORT: port = 3000,
-  HOST: host = '127.0.0.1',
+  PORT: port = process.env.port || 3000,
+  HOST: host = process.env.host || '127.0.0.1'
 } = process.env;
 
 const app = express();
@@ -61,5 +61,5 @@ app.use(errorHandler);
 
 // Verðum að setja bara *port* svo virki á heroku
 app.listen(port, () => {
-  console.info(`Server running at http://${host}:${port}/`);
+  console.info(`Server running at http://localhost:${port}/`);
 });
