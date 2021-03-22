@@ -146,7 +146,7 @@ router.delete('/tv/:id', requireAdmin, catchErrors(deleteSeries));
 router.patch('/tv/:id', requireAdmin, catchErrors(updateSeries));
 // Routes fyrir series rating
 router.post('/tv/:serieNumber/rate',requireAuth,catchErrors(rateSerie));
-router.patch('/tv/:id/rate',requireAuth,catchErrors(updateRating));
+router.patch('/tv/:serieNumber/rate',requireAuth,catchErrors(updateRating));
 router.delete('/tv/:id/rate', requireAuth,catchErrors(deleteRating));
 // Routes fyrir series states
 router.post('/tv/:id/state',requireAuth,catchErrors(stateSerie));

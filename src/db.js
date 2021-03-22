@@ -78,8 +78,6 @@ export async function conditionalUpdate(table, id, fields, values) {
 
   const queryValues = [id].concat(filteredValues);
 
-  debug('Conditional update', q, queryValues);
-
   const result = await query(q, queryValues);
 
   return result;

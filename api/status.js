@@ -139,10 +139,13 @@ async function validateState(state) {
   }
   
   export async function updateRating(req, res) {
-    const { user } = requireAuth;
-    const { id } = req.params;
+    console.log('updating rating');
+    const { id } = req.user;
+    const { serieNumber } = req.params;
     const { rating } = req.body;
-    const ratings = { user, id, rating };
+    const ratings = { id, serieNumber, rating };
+
+    console.log(ratings.id);
   
     const validations = await validateRating(ratings);
   
@@ -151,24 +154,28 @@ async function validateState(state) {
     }
   
     const fields = [
-      isInt(ratings.FK_user) ? 'FK_user' : null,
-      isString(ratings.id) ? 'id' : null,
-      isString(ratings.rating) ? 'rating' : null,
+      'id',
+      'FK_serie',
+      'rating'
     ];
   
     const values = [
-      isInt(ratings.FK_user) ? xss(ratings.FK_user) : null,
-      isInt(ratings.id) ? xss(ratings.id) : null,
-      isInt(ratings.rating) ? xss(ratings.rating) : null,
+      ratings.id,
+      ratings.serieNumber,
+      ratings.rating
     ];
+
+    console.log(fields);
+    console.log(values);
   
     if (!fields.filter(Boolean).length === 0) {
       return res.status(400).json({ error: 'Nothing to update' });
     }
+
+    const resultID = await query(`SELECT id FROM users_series WHERE FK_user=$1 AND FK_serie=$2`, [id, serieNumber]);
+    const currentId = resultID.rows[0].id;
   
-    fields.push('updated');
-  
-    const result = await conditionalUpdate('users_series', id, fields, values);
+    const result = await conditionalUpdate('users_series', currentId, fields, values);
     return res.status(201).json(result.rows[0]);
   }
   
