@@ -43,3 +43,23 @@ T.d. skilar POST request með body-inu {"username":"admin", "password":"123"}:
 }
 ```
 Í Postman er hægt að setja gildi token sem Type: Bearer token í Auth flipanum til að geta sent beiðnir sem admin.
+
+Þá er t.d. hægt að senda POST request á /tv með body 
+
+{ "name":"testSerie", "aired":"2000-12-12", "inProduction":true, "tagline":"test tagline", "thumbnail":"nice.jpg", "description":"test description", "language":"is", "network":"blablanetwork", "url":"bla.is"} 
+
+til að búa til nýtt serie og það skilar:
+```
+{
+    "id": 21,
+    "name": "testSerie",
+    "aired": "2000-12-12T00:00:00.000Z",
+    "inproduction": true,
+    "tagline": "test tagline",
+    "thumbnail": "nice.jpg",
+    "description": "test description",
+    "language": "is",
+    "network": "blablanetwork",
+    "url": "bla.is"
+}
+```
