@@ -29,7 +29,7 @@ admin hefur réttindi stjórnanda en jennsara er venjulegur notandi.
 
 Hægt er að senda beiðnir skv. forskrift á öll route skilgreind í index.js
 
-T.d. skilar POST request með body-inu {"username":"admin", "password":"123"}:
+T.d. skilar POST request sem admin með body-inu {"username":"admin", "password":"123"}:
 ```
 {
     "user": {
